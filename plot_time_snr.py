@@ -82,11 +82,11 @@ for cachefile in cachelist:
   ######## plot triggers and save plot
 
   plot = trigs2.plot('time', 'central_freq', color='snr', edgecolor='none')
-  plot.set_ylabel('Signal-to-noise ratio')
+  plot.set_ylabel('Central Frequency [Hz]')
   plot.set_yscale('log')
   title = r'L1:'+tag+' triggers'
   # Need to format _ to \_ for latex compatibility
-  title  = title.replace('_', '\textunderscore')
+  title  = title.replace('_', '\_')
   plot.set_title(title)
   plot.add_colorbar(label='Signal-to-noise ratio')
   plt.savefig('%s_snr_time.png' %tag)
