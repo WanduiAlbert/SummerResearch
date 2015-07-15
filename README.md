@@ -22,4 +22,10 @@ Current scripts and their descriptions:
      frequency and SNR have been made. Other relevant plots will be made as need
      be.
 
+  4. offsets.py: Takes in a BBH Trigger file and an Omicron cache file as
+     arguments.Determines the offset between the BBH triggers and the Omicron 
+     triggers based on a determined coincidence window. PLots of the time offset
+     as a function of the chirp mass are then made. Chirp mass is a great proxy 
+     for the duration of a BBH signal.
+
 
