@@ -142,52 +142,52 @@ def get_tag(omicroncachefile):
   tag = tag.split('.')[0]
   return tag
 
-def plot_chirp_relation(offsets, tag):
-  from math import (floor,ceil)
-  min = floor(np.min(offsets['mchirp']))
-  max = ceil(np.max(offsets['mchirp']))
-
-  masses = np.arange(min, max)
-  mean = []
-  err = []
+def plot_chirp_relation(offsets, tag, n=10):
+  indices = np.arange(len(offsets['mchirp']))
+  bins = np.array_split(indices, n)
   mc = []
-  for mass in masses:
-    sel = np.logical_and(offsets['mchirp'] >= mass-0.5, offsets['mchirp'] < \
-        mass+ 0.5)
-    if not np.any(sel):
-      continue
-    
-    mc += [mass]
-    times = offsets['offset'][sel]
-    mean += [np.average(times)]
-    if np.sum(sel) == 1:
-      err += [0.0]
-    else:
-      err += [np.std(times, ddof=1)]
+  xerr = []
+  mean = []
+  yerr = []
+  for bin in bins:
+    mc += [np.average(offsets['mchirp'][bin])]
+    xerr += [np.std(offsets['mchirp'][bin], ddof=1)]
+    mean += [np.average(offsets['offset'][bin])]
+    yerr += [np.std(offsets['offset'][bin], ddof=1)]
 
-  plt.errorbar(mc, mean, yerr=err)
-  plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
-  plt.ylabel(r'Mean offset [Sec]')
-  plt.title(tag)
-  plt.savefig(tag + '_offset.png')
+  plt.plot(mc,mean, label=tag)
 
-  
+
 if __name__=='__main__':
   segs = load_segs()
-
+  n = 20 
+  window = 3.0
   bbhfile = sys.argv[1]
   bbh_trigs = load_bbh_trigs(bbhfile, segs)
-
-  omiccachefile = sys.argv[2]
-  omic_trigs = load_omic_trigs(omiccachefile, segs)
-  tag = get_tag(omiccachefile)
-
   bbh_endtimes, mchirp = get_bbh_params(bbh_trigs)
+  
+  omiccachedir = sys.argv[2]
+  import glob
+  omiccachelist = glob.glob(omiccachedir + '*.cache')
+  plt.figure()
+  
+  for i in xrange(5):
+    omiccachefile = omiccachelist[i]
+    print "\n\nCurrently reading file: %s \n" % omiccachefile
+    omic_trigs = load_omic_trigs(omiccachefile, segs)
+    tag = get_tag(omiccachefile)
+    print "\n\nExtracting the peak times ...\n"
+    omic_times = get_omic_params(omic_trigs)
+    print "\nDone...\n Calculating the offsets...\n"
+    offsets = get_offsets(bbh_endtimes, mchirp, omic_times, window)
+    print "\n Done... \n Adding the mean offsets to the plot ...\n"
+    print "\n\n Done. Moving on to the next file in the list. \n"
+    plot_chirp_relation(offsets, tag, n)
 
-  omic_times = get_omic_params(omic_trigs)
-
-  window = 1.0
-
-  offsets = get_offsets(bbh_endtimes, mchirp, omic_times, window)
-
-  plot_offsets(offsets, tag)
+  lgd = plt.legend(loc="upper left", bbox_to_anchor=(1,1))
+  plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
+  plt.ylabel(r'Mean offset [Sec]')
+  plt.title('Mean offset as a function of the chirp mass')
+  plt.savefig('all_offsets.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+  plt.close()
+  print "\nAll plots are completed!\n"
