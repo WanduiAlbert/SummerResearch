@@ -142,6 +142,36 @@ def get_tag(omicroncachefile):
   tag = tag.split('.')[0]
   return tag
 
+def plot_chirp_relation(offsets, tag):
+  from math import (floor,ceil)
+  min = floor(np.min(offsets['mchirp']))
+  max = ceil(np.max(offsets['mchirp']))
+
+  masses = np.arange(min, max)
+  mean = []
+  err = []
+  mc = []
+  for mass in masses:
+    sel = np.logical_and(offsets['mchirp'] >= mass-0.5, offsets['mchirp'] < \
+        mass+ 0.5)
+    if not np.any(sel):
+      continue
+    
+    mc += [mass]
+    times = offsets['offset'][sel]
+    mean += [np.average(times)]
+    if np.sum(sel) == 1:
+      err += [0.0]
+    else:
+      err += [np.std(times, ddof=1)]
+
+  plt.errorbar(mc, mean, yerr=err)
+  plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
+  plt.ylabel(r'Mean offset [Sec]')
+  plt.title(tag)
+  plt.savefig(tag + '_offset.png')
+
+  
 if __name__=='__main__':
   segs = load_segs()
 
