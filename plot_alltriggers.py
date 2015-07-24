@@ -21,13 +21,14 @@ mtotal = mass1 + mass2
 eta = mass1 * mass2/ mtotal**2
 mchirp = eta**(3./5)*mtotal
 
-selection = snr >= 0.0 
+selection = snr >= 5.5 
 plt.hist(snr[selection], bins=300)
 ax = plt.gca()
 ax.set_yscale('log', nonposy='clip')
 ax.set_xlabel('SNR')
+#ax.set_xscale('log', nonposy='clip')
 ax.set_ylabel('Number of events N')
-ax.set_xlim(1, 20)
+ax.set_xlim(1, 5000)
 plt.title('H1, BBH triggers, ER7')
 plt.grid()
 plt.savefig('H1_snr.png')
