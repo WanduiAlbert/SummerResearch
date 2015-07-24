@@ -117,25 +117,24 @@ def get_offsets(bbh_endtimes, mchirp,  omic_times, window):
 #  this function can be used to plot the histograms for different chirp mass
 #  ranges. The current indication is that for higher chirp masses, the
 #  histograms should be centered around more negative values of the offset.
-def plot_offsets(offsets, tag):
+def plot_offsets(offsets, tag, n):
   # Calculate the bins that we want
-  binwidth = 0.1 # 0.1 seconds 
-  max = np.max(offsets)
-  min = np.min(offsets)
-  N = (max - min)/binwidth
-  bins = np.linspace(min, max, N+1)# N+1 gives you N bins
+  #binwidth = 0.1 # 0.1 seconds 
+  #max = np.max(offsets)
+  #min = np.min(offsets)
+  #N = (max - min)/binwidth
+  #bins = np.linspace(min, max, N+1)# N+1 gives you N bins
   # Lets try making a plot of this and see what we get
-  plt.figure()
-  plt.hist(offsets, bins)
+  plt.hist(offsets, bins=n, histtype='step', label=tag)
   plt.yscale('log', nonposy='clip')
-  plt.ylabel('N')
-  plt.xlabel('Offsets [Sec]')
-  plt.grid()
+  #plt.ylabel('N')
+  #plt.xlabel('Offsets [Sec]')
+  #plt.grid()
   #plt.ylim(10, 10**5)
-  plt.xlim(min,max)
-  plt.title('Offset between BBH triggers and '+ tag + ' triggers')
-  plt.savefig('BBH_'+tag+'.png' )
-  plt.close()
+  #plt.xlim(-1.5,1.5)
+  #plt.title('Offset between BBH triggers and '+ tag + ' triggers')
+  #plt.savefig('BBH_'+tag+'.png' )
+  #plt.close()
 
 # Simple script to load the segment lists for valid data from a text file
 def load_segs():
@@ -184,8 +183,8 @@ def plot_chirp_relation2(offsets, tag, n=10):
 
 if __name__=='__main__':
   segs = load_segs()
-  n = 10
-  window = 3.0
+  n = 50
+  window = 300.0
   tag = ''
   bbhfile = sys.argv[1]
   bbh_trigs = load_bbh_trigs(bbhfile, segs)
@@ -205,19 +204,22 @@ if __name__=='__main__':
     omic_times = get_omic_params(omic_trigs)
     print "\nDone...\n Calculating the offsets...\n"
     offsets = get_offsets(bbh_endtimes, mchirp, omic_times, window)
-    print offsets.shape
     print "\n Done... \n Adding the mean offsets to the plot ...\n"
     print "\n\n Done. Moving on to the next file in the list. \n"
-    plot_chirp_relation(offsets, tag, n)
+    plot_offsets(offsets['offset'], tag, n)
+    #plot_chirp_relation(offsets, tag, n)
     #plot_chirp_relation2(offsets, tag, n)
 
-  plt.grid()
+  plt.grid(True)
   lgd = plt.legend(loc="upper left", bbox_to_anchor=(1,1))
-  plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
-  plt.ylabel(r'Mean offset [Sec]')
-  plt.title('Mean offset as a function of the chirp mass')
-  plt.xscale('log', nonposx='clip')
-  plt.xlim(1, 11)
-  plt.savefig('all_offsets.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+  #plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
+  plt.xlabel(r'Offset  [Sec]')
+  plt.ylabel(r'N')
+  plt.title('A histogram of the offset between BBH and Omicron\n triggers')
+  #plt.title('Mean offset as a function of the chirp mass')
+  #plt.xscale('log', nonposx='clip')
+  #plt.xlim(1, 11)
+  plt.xlim(-window/2,window/2)
+  plt.savefig('all_histograms.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
   plt.close()
   print "\nAll plots are completed!\n"
