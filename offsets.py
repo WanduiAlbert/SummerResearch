@@ -155,18 +155,51 @@ def get_tag(omicroncachefile):
 # diminishingly smaller as the number of bins is made arbitrarily large.
 def plot_chirp_relation(offsets, tag, n=10):
   indices = np.arange(len(offsets['mchirp']))
+  #indices = np.where(offsets['mchirp'] > 10.0)[0]
   bins = np.array_split(indices, n)
   mc = []
   xerr = []
   mean = []
   yerr = []
   for bin in bins:
-    mc += [np.average(offsets['mchirp'][bin])]
+    mc += [np.median(offsets['mchirp'][bin])]
     xerr += [np.std(offsets['mchirp'][bin], ddof=1)]
-    mean += [np.average(offsets['offset'][bin])]
+    mean += [np.median(offsets['offset'][bin])]
     yerr += [np.std(offsets['offset'][bin], ddof=1)]
 
+  #plt.errorbar(mc, mean,fmt='o', yerr=yerr, xerr=xerr)
   plt.plot(mc,mean, label=tag)
+
+# This makes subplots of the offsets in groupings of the chirp
+# mass. The hope is that this will make the trends more clear
+# and the patterns way more distinguishable
+def plot_subplots(offsets, tag, n, window):
+  fig, axarr = plt.subplots(4, sharex=True)
+  sel1 = np.logical_and(offsets['mchirp'] > 0.0, offsets['mchirp'] <= 5.0)
+  sel2 = np.logical_and(offsets['mchirp'] > 5.0, offsets['mchirp'] <= 10.0)
+  sel3 = np.logical_and(offsets['mchirp'] > 10.0, offsets['mchirp'] <= 15.0)
+  sel4 = np.logical_and(offsets['mchirp'] > 15.0, offsets['mchirp'] <= 100.0)
+  
+  sel = [sel1, sel2, sel3, sel4]
+  labels = [r'$\mathcal{M}\ \leq\ 5M_{\odot}$', r'$5M_{\odot}\ <\ \mathcal{M}\ \leq\ 10M_{\odot}$'\
+      ,r'$10M_{\odot}\ <\ \mathcal{M}\ \leq\ 15M_{\odot}$', r'$\mathcal{M}\ >\ 15M_{\odot}$']
+  
+  for i in xrange(len(axarr)):
+    axarr[i].hist(offsets['offset'][sel[i]], histtype='step', bins=n, label=labels[i])
+    axarr[i].set_yscale('log', nonposy='clip')
+    axarr[i].set_xlim(-1.5, 1.5)
+    axarr[i].set_ylabel(r'N')
+    axarr[i].grid(True)
+    axarr[i].legend(loc="upper left", bbox_to_anchor=(1,1))
+
+  axarr[3].set_xlabel(r'Offset  [Sec]')
+  fig.subplots_adjust(hspace=0.5)
+  plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+
+  axarr[0].set_title( tag)
+  plt.savefig(tag + '_subplotshistogram.png', bbox_inches='tight')
+  #, bbox_extra_artists=(lgd,), bbox_inches='tight')
+  plt.close()
 
 # Generates a plot of the chirp mass vs the running average of the offsets. The
 # parameter n, now determines the number of points to be used in the running
@@ -195,8 +228,8 @@ if __name__=='__main__':
   omiccachelist = glob.glob(omiccachedir + '*.cache')
   plt.figure()
   
-  for i in xrange(len(omiccachelist[:5])):
-    omiccachefile = omiccachelist[i]
+  for omiccachefile in omiccachelist[12:]:
+    #omiccachefile = omiccachelist[i]
     print "\n\nCurrently reading file: %s \n" % omiccachefile
     omic_trigs = load_omic_trigs(omiccachefile, segs)
     tag = get_tag(omiccachefile)
@@ -206,20 +239,30 @@ if __name__=='__main__':
     offsets = get_offsets(bbh_endtimes, mchirp, omic_times, window)
     print "\n Done... \n Adding the mean offsets to the plot ...\n"
     print "\n\n Done. Moving on to the next file in the list. \n"
-    plot_offsets(offsets['offset'], tag, n)
+    sel = np.logical_and(offsets['mchirp'] > 0.0, offsets['mchirp'] <= 5.0)
+    if not np.any(sel):
+      continue
+    plot_offsets(offsets['offset'][sel], tag, n)
     #plot_chirp_relation(offsets, tag, n)
     #plot_chirp_relation2(offsets, tag, n)
+    #plt.figure()
+    #plot_subplots(offsets, tag, n, window):
 
   plt.grid(True)
   lgd = plt.legend(loc="upper left", bbox_to_anchor=(1,1))
   #plt.xlabel(r'$\mathcal{M}$ [$M_{\odot}$]')
   plt.xlabel(r'Offset  [Sec]')
   plt.ylabel(r'N')
-  plt.title('A histogram of the offset between BBH and Omicron\n triggers')
-  #plt.title('Mean offset as a function of the chirp mass')
+  #plt.ylabel(r'Median Offset [Sec]')
+  #plt.ylim(-0.7, 0.5)
+  plt.title('A histogram of the offset between BBH and Omicron\n triggers with'\
+      + ' $\mathcal{M}\ \leq\ 5 M_{\odot} $')
+  #plt.title('A histogram of the offset between BBH and Omicron\n triggers with'\
+  #    + ' $10 M_{\odot}\ <\ \mathcal{M}\ \leq\ 15 M_{\odot} $')
+  #plt.title('Median offset as a function of the chirp mass')
   #plt.xscale('log', nonposx='clip')
   #plt.xlim(1, 11)
-  plt.xlim(-window/2,window/2)
-  plt.savefig('all_histograms.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+  plt.xlim(-window/2, window/2)
+  plt.savefig('5M_histogram.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
   plt.close()
   print "\nAll plots are completed!\n"
