@@ -22,8 +22,8 @@ trigs = trigs.vetoed(segs)
 plot = trigs.plot('time', 'snr', edgecolor='none')#, epoch=1117378816)
 #plot.set_xlim(1117378816, 1117378816+(24*3600*11.0))
 plot.set_ylabel('SNR')
-plot.set_yscale('log')
-plot.set_title('The Livingston BBH triggers during the ER7 run')
+plot.set_yscale('log', nonposy='clip')
+plot.set_title('BBH triggers during the ER7 run')
 plot.savefig('H1_BBH_SNR.png')
 
 
