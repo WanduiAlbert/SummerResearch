@@ -3,6 +3,7 @@ from gwpy.table.lsctables import SnglInspiralTable
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 #L1data = np.load('ER7L1triggers.npz', 'r')
 #H1data = np.load('ER7H1triggers.npz', 'r')
@@ -21,16 +22,33 @@ mtotal = mass1 + mass2
 eta = mass1 * mass2/ mtotal**2
 mchirp = eta**(3./5)*mtotal
 
-selection = snr >= 5.5 
-plt.hist(snr[selection], bins=300)
+# Make the boolean arrays for selecting the data that we need.
+# Set a threshold on the SNR so that we can focus on the 
+# fall off at lower SNRs.
+snr_sel = np.logical_and(snr >= 5.5, snr <50)
+mass_sel = np.vstack((np.logical_and(mchirp > 0.0, mchirp <= 5.0),\
+    np.logical_and(mchirp > 5.0, mchirp <= 10.0), \
+    np.logical_and(mchirp > 10.0, mchirp <= 15.0), \
+    np.logical_and(mchirp > 15.0, mchirp <= 100.0)))
+# Labels for the plots
+labels = [r'$\mathcal{M}\ \leq\ 5M_{\odot}$', \
+    r'$5M_{\odot}\ <\ \mathcal{M}\ \leq\ 10M_{\odot}$',\
+   r'$10M_{\odot}\ <\ \mathcal{M}\ \leq\ 15M_{\odot}$',\
+   r'$\mathcal{M}\ >\ 15M_{\odot}$']
+
+data =[snr[np.logical_and(mass_sel[i,:], snr_sel)] for i in xrange(4)]
+print len(data)
+
+plt.hist(data, bins=30, histtype='step', label=labels)
 ax = plt.gca()
 ax.set_yscale('log', nonposy='clip')
 ax.set_xlabel('SNR')
-#ax.set_xscale('log', nonposy='clip')
+#ax.set_xscale('log', nonposx='clip')
 ax.set_ylabel('Number of events N')
-ax.set_xlim(1, 5000)
-plt.title('H1, BBH triggers, ER7')
+ax.set_xlim(1, 50)
+plt.title('L1, BBH triggers, ER7')
 plt.grid()
-plt.savefig('H1_snr.png')
+plt.legend()
+plt.savefig('L1_snr_lt_50_mchirp_bins_not_stacked.png')
 
 
