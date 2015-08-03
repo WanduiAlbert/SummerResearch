@@ -48,8 +48,9 @@ def load_omic_trigs(omicroncachefile, segs):
   with open(omicroncachefile, 'r') as cachefile:
     cache = Cache.fromfile(cachefile)
 
-  omic_trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda x: x.snr <\
-      100 and x.peak_frequency < 100)
+  omic_trigs = SnglBurstTable.read(cache, verbose=True)
+  #omic_trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda x: x.snr <\
+  #    100 and x.peak_frequency < 100)
 
   # Check if Omicron triggers have been read in successfully
   if not omic_trigs:
@@ -127,7 +128,7 @@ def get_tag(omicroncachefile):
 # mass. The hope is that this will make the trends more clear
 # and the patterns way more distinguishable
 def plot_subplots(offsets, tag, n, window):
-  fig, axarr = plt.subplots(4, sharex=True)
+  fig, axarr = plt.subplots(4, sharex=True, **dict(figsize=(12,12)))
   sel1 = np.logical_and(offsets['mchirp'] > 0.0, offsets['mchirp'] <= 5.0)
   sel2 = np.logical_and(offsets['mchirp'] > 5.0, offsets['mchirp'] <= 10.0)
   sel3 = np.logical_and(offsets['mchirp'] > 10.0, offsets['mchirp'] <= 15.0)
@@ -137,13 +138,16 @@ def plot_subplots(offsets, tag, n, window):
   labels = [r'$\mathcal{M}\ \leq\ 5M_{\odot}$', r'$5M_{\odot}\ <\ \mathcal{M}\ \leq\ 10M_{\odot}$'\
       ,r'$10M_{\odot}\ <\ \mathcal{M}\ \leq\ 15M_{\odot}$', r'$\mathcal{M}\ >\ 15M_{\odot}$']
   
+  hist_min = np.min(offsets['offset'][sel[0]])
+  hist_max = np.max(offsets['offset'][sel[0]])
+  
   for i in xrange(len(axarr)):
     if not np.any(sel[i]):
       continue
-
-    axarr[i].hist(offsets['offset'][sel[i]], histtype='step', bins=n, label=labels[i])
+    axarr[i].hist(offsets['offset'][sel[i]], histtype='step', bins=n,\
+        range=[hist_min, hist_max], label=labels[i])
     axarr[i].set_yscale('log', nonposy='clip')
-    axarr[i].set_xlim(-0.25, 0.25)
+    axarr[i].set_xlim(-window/2, window/2)
     axarr[i].set_ylabel(r'N')
     axarr[i].grid(True)
     axarr[i].legend(loc="upper left", bbox_to_anchor=(1,1))
@@ -160,12 +164,12 @@ def plot_subplots(offsets, tag, n, window):
 if __name__=='__main__':
   segs = load_segs()
   n = 50
-  window = 0.5 
+  window = 3.0
   tag = ''
   bbhfile = sys.argv[1]
   bbh_trigs = load_bbh_trigs(bbhfile, segs)
   bbh_endtimes, mchirp = get_bbh_params(bbh_trigs)
-  
+
   omiccachedir = sys.argv[2]
   import glob
   omiccachelist = glob.glob(omiccachedir + '*.cache')
@@ -178,9 +182,9 @@ if __name__=='__main__':
     tag = get_tag(omiccachefile)
     print "\n\nExtracting the peak times ...\n"
     omic_times = get_omic_params(omic_trigs)
-    print "\nDone...\n Calculating the offsets...\n"
+    print "\nDone...\nCalculating the offsets...\n"
     offsets = get_offsets(bbh_endtimes, mchirp, omic_times, window)
-    print "\n Done... \n Adding the mean offsets to the plot ...\n"
+    print "\n Done... \nAdding the mean offsets to the plot ...\n"
     print "\n\n Done. Moving on to the next file in the list. \n"
     plot_subplots(offsets, tag, n, window)
 
