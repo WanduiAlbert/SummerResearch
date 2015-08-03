@@ -25,7 +25,9 @@ mchirp = eta**(3./5)*mtotal
 # Make the boolean arrays for selecting the data that we need.
 # Set a threshold on the SNR so that we can focus on the 
 # fall off at lower SNRs.
-snr_sel = np.logical_and(snr >= 5.5, snr <50)
+min = 5.5
+max = np.max(snr)
+snr_sel = np.logical_and(snr >= min, snr <max)
 mass_sel = np.vstack((np.logical_and(mchirp > 0.0, mchirp <= 5.0),\
     np.logical_and(mchirp > 5.0, mchirp <= 10.0), \
     np.logical_and(mchirp > 10.0, mchirp <= 15.0), \
@@ -38,17 +40,18 @@ labels = [r'$\mathcal{M}\ \leq\ 5M_{\odot}$', \
 
 data =[snr[np.logical_and(mass_sel[i,:], snr_sel)] for i in xrange(4)]
 print len(data)
-
-plt.hist(data, bins=30, histtype='step', label=labels)
+bins = np.logspace(np.log10(min), np.log10(max),num=50)
+plt.figure(figsize=(12,10))
+plt.hist(data, bins=bins, histtype='step', label=labels)
 ax = plt.gca()
 ax.set_yscale('log', nonposy='clip')
 ax.set_xlabel('SNR')
-#ax.set_xscale('log', nonposx='clip')
+ax.set_xscale('log', nonposx='clip')
 ax.set_ylabel('Number of events N')
-ax.set_xlim(1, 50)
+ax.set_xlim(min, max)
 plt.title('L1, BBH triggers, ER7')
-plt.grid()
+plt.grid(True, which='both')
 plt.legend()
-plt.savefig('L1_snr_lt_50_mchirp_bins_not_stacked.png')
+plt.savefig('L1_snr_all_mchirp_bins_not_stacked.png')
 
 
