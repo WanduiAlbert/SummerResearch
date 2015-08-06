@@ -11,7 +11,10 @@ from gwpy.table.lsctables import SnglBurstTable, SnglInspiralTable
 
 from glue.lal import Cache
 
-from gwpy.toolkit.vet import (get_triggers,get_segments,get_metric)
+from gwpy.toolkits.vet import (get_triggers,get_segments,get_metric)
+
+# Save all the channels in a python script
+from channels import channels
 
 ifo = sys.argv[1]
 bbhfile = sys.argv[2]
@@ -43,13 +46,10 @@ mchirp = eta**(3./5)*M
 # Read in all the Omicron caches
 # Also get an idea of the speed of the code when reading from cache file vs
 # letting vet get the data itself
-import time
-t0 = time.time()
 
-channels = channels.channellist() # Save all the channels in a python script
 Nchannels = len(channels)
 
-def omicron_triggers(channel, ifo, segments, cachefile):
+def get_omicron_triggers(channel, ifo, segments, cachefile):
   with open(cachefile) as f:
     mycache = Cache.fromfile(f)
   # Let's try and catch failed reads
@@ -68,14 +68,15 @@ ifos = [ifo]*Nchannels
 segs = [segments]*Nchannels
 cachefiles = [cachefile]*Nchannels
 
-omic_triggers = map(channels, ifos, segs, cachefiles)
-
+import time
+t0 = time.time()
+omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
 t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
 print "This took %f seconds to run to completion" %(t1 - t0)
 
 # Get the peak times of the Omicron triggers
-omic_endtimes = map(lambda x: x.get_end(), omic_triggers)
+omic_endtimes = map(lambda x: x.get_peak(), omic_triggers)
 
 # ---------------------------------------------------------------------------- #
 # Now let's calculate the offsets between the BBH and Omicron triggers 
