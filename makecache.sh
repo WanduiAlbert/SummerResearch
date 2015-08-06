@@ -1,6 +1,6 @@
 #! /bin/bash
 
-SITE='L1' #change this to H1 if working in the Hanford clusteri
+SITE='H1' #change this to H1 if working in the Hanford clusteri
 
 CHANNELS="ASC-AS_B_RF36_I_YAW_OUT_DQ_Omicron
 PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ_Omicron
