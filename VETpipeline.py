@@ -33,13 +33,15 @@ bbh_trigs = bbh_trigs.vetoed(segments)
 # We need to extract the chirp mass and the end times for these triggers
 end_times = bbh_trigs.get_end()
 
-m1 = bbh_trigs.getColumnByName('mass1')
-m2 = bbh_trigs.getColumnByName('mass2')
+m1 = np.array(bbh_trigs.getColumnByName('mass1')[:])
+m2= np.array(bbh_trigs.getColumnByName('mass2')[:])
 
 M = m1+m2
 eta = (m1*m2)/M**2
 mchirp = eta**(3./5)*M
 
+print "Read in all the BBH triggers!!!\n"
+print "Let's start working on the Omicron triggers...\n"
 # Consider appending the Mchirp column to the SnglInspiralTable
 # ---------------------------------------------------------------------------- #
 
@@ -50,6 +52,7 @@ mchirp = eta**(3./5)*M
 Nchannels = len(channels)
 
 def get_omicron_triggers(channel, ifo, segments, cachefile):
+  print "Reading channel: %s\n" %channel
   with open(cachefile) as f:
     mycache = Cache.fromfile(f)
   # Let's try and catch failed reads
