@@ -13,11 +13,13 @@ from glue.lal import Cache
 
 from gwpy.toolkits.vet import (get_triggers,get_segments,get_metric)
 
+import glob, os
 # Save all the channels in a python script
 from channels import channels
 
 ifo = sys.argv[1]
-bbhfile = sys.argv[2]
+bbhdir = sys.argv[2]
+bbhfile= glob.glob(os.path.join(bbhdir, ifo+'*.xml.gz'))[0]
 omiccachedir = sys.argv[3]
 
 # Read in the segment file
@@ -71,7 +73,6 @@ ifos = [ifo]*Nchannels
 segs = [segments]*Nchannels
 
 # Get all the cache files from the directory
-import glob, os
 cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
 
 # Now we can read in the triggers and also worry about performance
