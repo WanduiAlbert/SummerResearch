@@ -69,8 +69,12 @@ def get_omicron_triggers(channel, ifo, segments, cachefile):
 # Make lists of all the parameters
 ifos = [ifo]*Nchannels
 segs = [segments]*Nchannels
-cachefiles = [cachefile]*Nchannels
 
+# Get all the cache files from the directory
+import glob
+cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
+
+# Now we can read in the triggers and also worry about performance
 import time
 t0 = time.time()
 omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
