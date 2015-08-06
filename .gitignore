@@ -1,2 +1,4 @@
 # Ignore the following files when adding to git
 *.cache
+*.py~
+*.py.un~
