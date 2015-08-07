@@ -78,9 +78,9 @@ cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
 # Now we can read in the triggers and also worry about performance
 import time
 t0 = time.time()
-omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
+omic_trigger_tables = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
 t1  = time.time()
-print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
+print "All the Omicron triggers for %d channels loaded." %len(omic_trigger_tables)
 print "This took %f seconds to run to completion\n" %(t1 - t0)
 
 
@@ -99,8 +99,8 @@ NumBBH = len(end_times)
 
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
-omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
-#snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_triggers)
+peaktime_all_channels = np.array(map(lambda x: x.get_peak(), omic_trigger_tables))
+#snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
 # Calculate the offsets for a single channel. omic_times is the array of all the
 # peaktimes for a single channel and bbhtimes is the array of endtimes for the
@@ -115,12 +115,12 @@ def get_offset(omic_times, end_times):
 
 print "Now lets tile the Omicron end times and calculate the offsets.\n"
 
-for i in xrange(len(omic_peaktimes[0])):
+for i in xrange(len(peaktime_all_channels[0])):
   print "Index : %d\n" %i
-  offsets = get_offset(omic_peaktimes, end_times)
+  offsets = get_offset(peaktime_all_channels[0], end_times)
 
 print offsets.shape
-#allofssets = map(get_offset, omic_peaktimes[0],\ [end_times])#*Nchannels)
+#allofssets = map(get_offset, peaktime_all_channels[0],\ [end_times])#*Nchannels)
 
 print "This worked out fine thus far!!!"
 
