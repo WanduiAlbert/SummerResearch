@@ -101,7 +101,7 @@ NumBBH = len(end_times)
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
 peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
-snr = np.array(omic_triggers.getColumnByName('snr')[:])
+snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_triggers)
 
 omic_data = np.array(zip(peaktimes,snr),\
     dtype=[('peaktimes',np.float64),('snr', np.float32)])
