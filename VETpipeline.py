@@ -74,7 +74,7 @@ ifos = [ifo]*Nchannels
 segs = [segments]*Nchannels
 
 # Get all the cache files from the directory
-cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
+cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))[0]
 
 # Now we can read in the triggers and also worry about performance
 import time
