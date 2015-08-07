@@ -104,13 +104,16 @@ NumBBH = len(end_times)
 # BBH triggers. At the end we take the transpose so as to ensure that the shape
 # of the resulting array is (NumOmicron, NumBBH). Each column represents the
 # offsets between the Omicron triggers and a single BBH trigger end time.
+pos = 0
 def get_offset(omic_times, bbhtimes):
-  return np.array(map(lambda omictime: np.abs(bbhtimes - omictime),\
-      omic_times)).transpose()
+  pos += 1
+  print "I am currently working on channel %d" %pos
+  return map(lambda omictime: np.abs(bbhtimes - omictime),\
+      omic_times)
 
 print "Now lets tile the Omicron end times and calculate the offsets.\n"
-allofssets = np.array(map(get_offset, omic_peaktimes,\
-    [end_times]*Nchannels))
+allofssets = map(get_offset, omic_peaktimes[0],\
+    [end_times])#*Nchannels)
 
 print "This worked out fine thus far!!!"
 
