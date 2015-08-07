@@ -51,7 +51,8 @@ print "Let's start working on the Omicron triggers...\n"
 # Also get an idea of the speed of the code when reading from cache file vs
 # letting vet get the data itself
 
-Nchannels = len(channels)
+#Nchannels = len(channels)
+Nchannels = 1
 
 def get_omicron_triggers(channel, ifo, segments, cachefile):
   print "Reading channel: %s\n" %channel
@@ -78,7 +79,7 @@ cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
 # Now we can read in the triggers and also worry about performance
 import time
 t0 = time.time()
-omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
+omic_triggers = map(get_omicron_triggers, channels[0], ifos, segs, cachefiles)
 t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
 print "This took %f seconds to run to completion\n" %(t1 - t0)
