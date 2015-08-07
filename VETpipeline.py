@@ -51,8 +51,7 @@ print "Let's start working on the Omicron triggers...\n"
 # Also get an idea of the speed of the code when reading from cache file vs
 # letting vet get the data itself
 
-#Nchannels = len(channels)
-Nchannels = 1
+Nchannels = len(channels)
 
 def get_omicron_triggers(channel, ifo, segments, cachefile):
   print "Reading channel: %s\n" %channel
@@ -74,12 +73,12 @@ ifos = [ifo]*Nchannels
 segs = [segments]*Nchannels
 
 # Get all the cache files from the directory
-cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))[0]
+cachefiles = glob.glob(os.path.join(omiccachedir, ifo + '/', '*.cache'))
 
 # Now we can read in the triggers and also worry about performance
 import time
 t0 = time.time()
-omic_triggers = map(get_omicron_triggers, [channels[0]], ifos, segs, cachefiles)
+omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
 t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
 print "This took %f seconds to run to completion\n" %(t1 - t0)
@@ -100,7 +99,7 @@ NumBBH = len(end_times)
 
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
-peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
+omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_triggers)
 
 # Calculate the offsets for a single channel. omic_times is the array of all the
@@ -109,14 +108,19 @@ peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 # of the resulting array is (NumOmicron, NumBBH). Each column represents the
 # offsets between the Omicron triggers and a single BBH trigger end time.
 pos = 0
-def get_offset(omic_times, bbhtimes):
+def get_offset(omic_times, end_times):
   print "I am currently working on channel %d" %pos
-  return map(lambda omictime: np.abs(bbhtimes - omictime),\
+  return map(lambda omictime: np.abs(end_times - omictime),\
       omic_times)
 
 print "Now lets tile the Omicron end times and calculate the offsets.\n"
-allofssets = map(get_offset, omic_peaktimes[0],\
-    [end_times])#*Nchannels)
+
+for i in xrange(len(omic_peaktimes[0])):
+  print "Index : %d\n" i
+  offsets = get_offset(omic_peaktimes, end_times)
+
+print offsets.shape
+#allofssets = map(get_offset, omic_peaktimes[0],\ [end_times])#*Nchannels)
 
 print "This worked out fine thus far!!!"
 
