@@ -116,7 +116,7 @@ def get_offset(omic_times, end_times):
 print "Now lets tile the Omicron end times and calculate the offsets.\n"
 
 for i in xrange(len(omic_peaktimes[0])):
-  print "Index : %d\n" i
+  print "Index : %d\n" %i
   offsets = get_offset(omic_peaktimes, end_times)
 
 print offsets.shape
