@@ -98,13 +98,20 @@ omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 # Simply preparing the data for vectorized computing of the offsets
 print "Starting the computation of the offsets...\n"
 NumBBH = len(end_times)
-tiledbbhtimes = end_times.reshape(NumBBH, 1)
-print "Reshaped the BBH end times. Now lets tile the Omicron end times.\n"
-tiledomictimes = np.array(map(lambda x: np.tile(x, NumBBH), omic_peaktimes))
 
-# Get all the offsets for all the channels at one time.
-print "Calculating the offsets."
-offsets = np.array(map(lambda x: np.abs(tiledbbhtimes - x), tiledomictimes))
+# Calculate the offsets for a single channel. omic_times is the array of all the
+# peaktimes for a single channel and bbhtimes is the array of endtimes for the
+# BBH triggers. At the end we take the transpose so as to ensure that the shape
+# of the resulting array is (NumOmicron, NumBBH). Each column represents the
+# offsets between the Omicron triggers and a single BBH trigger end time.
+def get_offset(omic_times, bbhtimes):
+  return np.array(map(lambda omictime: np.abs(bbhtimes - omictime),\
+      omic_times)).transpose()
+
+print "Now lets tile the Omicron end times and calculate the offsets.\n"
+allofssets = np.array(map(get_offset, omic_peaktimes,\
+    [end_times]*Nchannels))
+
 print "This worked out fine thus far!!!"
 
 
