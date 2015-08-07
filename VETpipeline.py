@@ -83,8 +83,6 @@ t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
 print "This took %f seconds to run to completion\n" %(t1 - t0)
 
-# Get the peak times of the Omicron triggers
-omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 
 # ---------------------------------------------------------------------------- #
 # Now let's calculate the offsets between the BBH and Omicron triggers.
@@ -99,6 +97,14 @@ omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 print "Starting the computation of the offsets...\n"
 NumBBH = len(end_times)
 
+# Here is where I should define the threshold on the SNR
+# Get the peak times of the Omicron triggers
+peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
+snr = np.array(omic_triggers.getColumnByName('snr')[:])
+
+omic_data = np.array(zip(peaktimes,snr),\
+    dtype=[('peaktimes',np.float64),('snr', np.float32)])
+
 # Calculate the offsets for a single channel. omic_times is the array of all the
 # peaktimes for a single channel and bbhtimes is the array of endtimes for the
 # BBH triggers. At the end we take the transpose so as to ensure that the shape
@@ -106,7 +112,6 @@ NumBBH = len(end_times)
 # offsets between the Omicron triggers and a single BBH trigger end time.
 pos = 0
 def get_offset(omic_times, bbhtimes):
-  pos += 1
   print "I am currently working on channel %d" %pos
   return map(lambda omictime: np.abs(bbhtimes - omictime),\
       omic_times)
