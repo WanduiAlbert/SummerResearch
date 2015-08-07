@@ -33,7 +33,7 @@ bbh_trigs = bbh_trigs.vetoed(segments)
 #bbh_trigs.sort(key=lambda x: x.end_time + x.end_time_ns * 1.0e-9)
 
 # We need to extract the chirp mass and the end times for these triggers
-end_times = bbh_trigs.get_end()
+end_times = np.array(bbh_trigs.get_end())
 
 m1 = np.array(bbh_trigs.getColumnByName('mass1')[:])
 m2= np.array(bbh_trigs.getColumnByName('mass2')[:])
@@ -81,11 +81,29 @@ t0 = time.time()
 omic_triggers = map(get_omicron_triggers, channels, ifos, segs, cachefiles)
 t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_triggers)
-print "This took %f seconds to run to completion" %(t1 - t0)
+print "This took %f seconds to run to completion\n" %(t1 - t0)
 
 # Get the peak times of the Omicron triggers
-omic_endtimes = map(lambda x: x.get_peak(), omic_triggers)
+omic_peaktimes = np.array(map(lambda x: x.get_peak(), omic_triggers))
 
 # ---------------------------------------------------------------------------- #
-# Now let's calculate the offsets between the BBH and Omicron triggers 
+# Now let's calculate the offsets between the BBH and Omicron triggers.
+# For each channel, we will make a two-dimensional array of repeated Omicron
+# endtimes. Then we can use vector operations and completely avoid loops in this
+# code. The BBH_endtimes have to be transposed in order for this to work. We
+# will then check to see if there are any Omicron triggers in the coincidence
+# window of a BBH trigger and get the segment times for those BBH triggers so as
+# to veto them.
+
+# Simply preparing the data for vectorized computing of the offsets
+print "Starting the computation of the offsets...\n"
+NumBBH = len(end_times)
+tiledomictimes = np.array(map(lambda x: np.tile(x, NumBBH), omic_peaktimes))
+tiledbbhtimes = end_times.reshape(NumBBH, 1)
+
+# Get all the offsets for all the channels at one time.
+offsets = np.array(map(lambda x: np.abs(tiledbbhtimes - x), tiledomictimes))
+print "This worked out fine thus far!!!"
+
+
 
