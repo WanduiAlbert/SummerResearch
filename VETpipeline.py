@@ -129,8 +129,8 @@ omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(bbhtime, omic_peaktimes):
   vetosegs = []
-  if np.any(bbhtime - omic_peaktimes) <= window/2.0:
-    vetosegs += Segment(bbhtime-window/2.0, bbhtime+window/2.0)
+  if np.any(np.abs(bbhtime - omic_peaktimes) <= window/2.0):
+    vetosegs += [Segment(bbhtime-window/2.0, bbhtime+window/2.0)]
   return vetosegs
 
 all_veto_segs = []
