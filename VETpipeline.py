@@ -125,7 +125,8 @@ def get_vetotimes(peaktime, end_times):
 print "Working on the first channel now...\n"
 all_veto_segs = []
 t0 = time.time()
-for peaktime in omic_peaktimes:
+for i, peaktime in enumerate(omic_peaktimes):
+  print "Omicron Trigger: %d" %i
   all_veto_segs += get_vetotimes(peaktime, end_times)
 t1 = time.time()
 print "This took %f seconds to run to completion\n" %(t1 - t0)
