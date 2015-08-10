@@ -126,24 +126,39 @@ peaktime_all_channels = map(lambda x: x.get_peak(), omic_trigger_tables)
 #print "This worked out fine thus far!!!"
 window = 2.0
 omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
+
+# Function that constructs a veto segment. Used with map
+def get_vetoseg(index):
+  return Segment(end_times[index] - window/2.0, end_times[index] + window/2.0)
+
 # Function that gets the veto time for a single bbhtime
-def get_vetotimes(bbhtime, omic_peaktimes):
+def get_vetotimes(peaktime, end_times):
   vetosegs = []
-  # It is interesting to note that omic_peaktimes - bbhtime works but
-  # bbhtime-omic_peaktimes doesn't. This symmetry is broken by the fact that
-  # the subtraction operator for LIGOTimeGPS is already overloaded. So I chose
-  # to do the omic-bbh since we will be taking the absolute value.
-  # Alternatively, you could np.array(bbhtime)
-  if np.any(np.abs(omic_peaktimes - bbhtime) <= window/2.0):
-    vetosegs += [Segment(bbhtime-window/2.0, bbhtime+window/2.0)]
-  return vetosegs
+  trigs = np.where(np.abs(end_times - peaktime) <= window/2.0)[0]
+  return map(get_vetoseg, trigs)
 
 print "Working on the first channel now...\n"
 all_veto_segs = []
-for i, bbhtime in enumerate(end_times):
-  print "Trigger %d \n" %i
-  all_veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
+for peaktime in omic_peaktimes:
+  all_veto_segs += get_vetotimes(peaktime, end_times)
 
+#def get_vetotimes(bbhtime, omic_peaktimes):
+#  vetosegs = []
+#  # It is interesting to note that omic_peaktimes - bbhtime works but
+#  # bbhtime-omic_peaktimes doesn't. This symmetry is broken by the fact that
+#  # the subtraction operator for LIGOTimeGPS is already overloaded. So I chose
+#  # to do the omic-bbh since we will be taking the absolute value.
+#  # Alternatively, you could np.array(bbhtime)
+#  if np.any(np.abs(omic_peaktimes - bbhtime) <= window/2.0):
+#    vetosegs += [Segment(bbhtime-window/2.0, bbhtime+window/2.0)]
+#  return vetosegs
+#
+#print "Working on the first channel now...\n"
+#all_veto_segs = []
+#for i, bbhtime in enumerate(end_times):
+#  print "Trigger %d \n" %i
+#  all_veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
+#
 print "All offsets for the first channel completed.Coalesce the segments now\n"
 all_veto_segs = SegmentList(all_veto_segs)
 # Merge contiguous veto sections and sort the list of segments
