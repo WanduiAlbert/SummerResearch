@@ -11,6 +11,8 @@ from gwpy.table.lsctables import SnglBurstTable, SnglInspiralTable
 
 from glue.lal import Cache
 
+from  gwpy.time import LIGOTimeGPS
+
 from gwpy.toolkits.vet import (get_triggers,get_segments,get_metric)
 
 import glob, os
@@ -99,7 +101,7 @@ NumBBH = len(end_times)
 
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
-peaktime_all_channels = np.array(map(lambda x: x.get_peak(), omic_trigger_tables))
+peaktime_all_channels = map(lambda x: x.get_peak(), omic_trigger_tables)
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
 # Calculate the offsets for a single channel. omic_times is the array of all the
@@ -107,22 +109,42 @@ peaktime_all_channels = np.array(map(lambda x: x.get_peak(), omic_trigger_tables
 # BBH triggers. At the end we take the transpose so as to ensure that the shape
 # of the resulting array is (NumOmicron, NumBBH). Each column represents the
 # offsets between the Omicron triggers and a single BBH trigger end time.
-pos = 0
-def get_offset(omic_times, end_times):
-  print "I am currently working on channel %d" %pos
-  return map(lambda omictime: np.abs(end_times - omictime),\
-      omic_times)
+#def get_offset(omic_times, end_times):
+#  print "I am currently working on channel %d" %pos
+#  return map(lambda omictime: np.abs(end_times - omictime),\
+#      omic_times)
+#
+#print "Now lets tile the Omicron end times and calculate the offsets.\n"
+#
+#for i in xrange(len(peaktime_all_channels[0])):
+#  print "Index : %d\n" %i
+#  offsets = get_offset(peaktime_all_channels[0], end_times)
+#
+#print offsets.shape
+##allofssets = map(get_offset, peaktime_all_channels[0],\ [end_times])#*Nchannels)
+#
+#print "This worked out fine thus far!!!"
+window = 2.0
+omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
+# Function that gets the veto time for a single bbhtime
+def get_vetotimes(bbhtime, omic_peaktimes):
+  vetosegs = []
+  if np.any(bbhtime - omic_peaktimes) <= window/2.0:
+    vetosegs += Segment(bbhtime-window/2.0, bbhtime+window/2.0)
+  return vetosegs
 
-print "Now lets tile the Omicron end times and calculate the offsets.\n"
+all_veto_segs = []
+for bbhtime in end_times:
+  all_veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
+all_veto_segs = SegmentList(all_veto_segs)
+# Merge contiguous veto sections and sort the list of segments
+all_veto_segs.coalesce()
 
-for i in xrange(len(peaktime_all_channels[0])):
-  print "Index : %d\n" %i
-  offsets = get_offset(peaktime_all_channels[0], end_times)
-
-print offsets.shape
-#allofssets = map(get_offset, peaktime_all_channels[0],\ [end_times])#*Nchannels)
-
-print "This worked out fine thus far!!!"
-
-
-
+# Write all the segments to disk. Read in the [0, 2] columns to recover the data
+# We will use h5py to write out all the segments in groups organized by the name
+# of the channel
+import h5py
+f = h5py.File('vetosegments.hdf5', 'w')
+grp = f.create_group('%s' %channels[0])
+SegmentList.write(all_veto_segs, grp, 'vetosegs')
+f.close()
