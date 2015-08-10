@@ -129,7 +129,12 @@ omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(bbhtime, omic_peaktimes):
   vetosegs = []
-  if np.any(np.abs(bbhtime - omic_peaktimes) <= window/2.0):
+  # It is interesting to note that omic_peaktimes - bbhtime works but
+  # bbhtime-omic_peaktimes doesn't. This symmetry is broken by the fact that
+  # the subtraction operator for LIGOTimeGPS is already overloaded. So I chose
+  # to do the omic-bbh since we will be taking the absolute value.
+  # Alternatively, you could np.array(bbhtime).
+  if np.any(np.abs(omic_peaktimes - bbhtime) <= window/2.0):
     vetosegs += [Segment(bbhtime-window/2.0, bbhtime+window/2.0)]
   return vetosegs
 
