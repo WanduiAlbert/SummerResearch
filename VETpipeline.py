@@ -55,14 +55,12 @@ Nchannels = len(channels)
 
 def get_omicron_triggers(channel, ifo, segments, cachefile):
   print "Reading channel: %s\n" %channel
-  with open(cachefile) as f:
+  with open(cachefile, 'r') as f:
     mycache = Cache.fromfile(f)
   # Let's try and catch failed reads
   try:
-    triggers = SnglBurstTable.read(mycache)
-    triggers = triggers.vetoed(segments)
-    #triggers = get_triggers(ifo + ':' + channel, 'sngl_burst', segments,\
-    #    cache=mycache)
+    triggers = get_triggers(ifo + ':' + channel, 'sngl_burst', segments,\
+        cache=mycache)
   except:
     print "No Omicron triggers read for channel %s" %channel
     return None
@@ -101,7 +99,10 @@ NumBBH = len(end_times)
 
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
-peaktime_all_channels = map(lambda x: x.get_peak(), omic_trigger_tables)
+peaktime_all_channels = map(lambda x: \
+    np.array(x.getColumnByName('peak_time')[:]) + \
+    np.array(x.getColumnByName('peak_time_ns')[:]) * 1.0e-9x.get_peak(),\
+    omic_trigger_tables)
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
 # Calculate the offsets for a single channel. omic_times is the array of all the
@@ -114,7 +115,7 @@ omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 
 # Function that constructs a veto segment. Used with map
 def get_vetoseg(index):
-  return Segment(end_times[index] - window/2.0, end_times[index] + window/2.0)
+  return Segment(end_times[index] - window/2.0,end_times[index] + window/2.0)
 
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(peaktime, end_times):
