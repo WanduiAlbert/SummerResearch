@@ -109,21 +109,6 @@ peaktime_all_channels = map(lambda x: x.get_peak(), omic_trigger_tables)
 # BBH triggers. At the end we take the transpose so as to ensure that the shape
 # of the resulting array is (NumOmicron, NumBBH). Each column represents the
 # offsets between the Omicron triggers and a single BBH trigger end time.
-#def get_offset(omic_times, end_times):
-#  print "I am currently working on channel %d" %pos
-#  return map(lambda omictime: np.abs(end_times - omictime),\
-#      omic_times)
-#
-#print "Now lets tile the Omicron end times and calculate the offsets.\n"
-#
-#for i in xrange(len(peaktime_all_channels[0])):
-#  print "Index : %d\n" %i
-#  offsets = get_offset(peaktime_all_channels[0], end_times)
-#
-#print offsets.shape
-##allofssets = map(get_offset, peaktime_all_channels[0],\ [end_times])#*Nchannels)
-#
-#print "This worked out fine thus far!!!"
 window = 2.0
 omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 
@@ -139,8 +124,11 @@ def get_vetotimes(peaktime, end_times):
 
 print "Working on the first channel now...\n"
 all_veto_segs = []
+t0 = time.time()
 for peaktime in omic_peaktimes:
   all_veto_segs += get_vetotimes(peaktime, end_times)
+t1 = time.time()
+print "This took %f seconds to run to completion\n" %(t1 - t0)
 
 #def get_vetotimes(bbhtime, omic_peaktimes):
 #  vetosegs = []
