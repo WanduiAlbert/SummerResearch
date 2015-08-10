@@ -101,7 +101,7 @@ NumBBH = len(end_times)
 # Get the peak times of the Omicron triggers
 peaktime_all_channels = map(lambda x: \
     np.array(x.getColumnByName('peak_time')[:]) + \
-    np.array(x.getColumnByName('peak_time_ns')[:]) * 1.0e-9x.get_peak(),\
+    np.array(x.getColumnByName('peak_time_ns')[:]) * 1.0e-9,\
     omic_trigger_tables)
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
