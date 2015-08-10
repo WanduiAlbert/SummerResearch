@@ -1,7 +1,5 @@
 # Import statements
 
-from __future__ import division
-
 import sys
 
 import numpy as np
@@ -61,8 +59,10 @@ def get_omicron_triggers(channel, ifo, segments, cachefile):
     mycache = Cache.fromfile(f)
   # Let's try and catch failed reads
   try:
-    triggers = get_triggers(ifo + ':' + channel, 'sngl_burst', segments,\
-        cache=mycache)
+    triggers = SnglBurstTable.read(mycache)
+    triggers = triggers.vetoed(segments)
+    #triggers = get_triggers(ifo + ':' + channel, 'sngl_burst', segments,\
+    #    cache=mycache)
   except:
     print "No Omicron triggers read for channel %s" %channel
     return None
