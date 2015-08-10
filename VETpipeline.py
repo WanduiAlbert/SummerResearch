@@ -140,8 +140,10 @@ def get_vetotimes(bbhtime, omic_peaktimes):
 
 print "Working on the first channel now...\n"
 all_veto_segs = []
-for bbhtime in end_times:
+for i, bbhtime in enumerate(end_times):
+  print "Trigger %d \n" %i
   all_veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
+
 print "All offsets for the first channel completed.Coalesce the segments now\n"
 all_veto_segs = SegmentList(all_veto_segs)
 # Merge contiguous veto sections and sort the list of segments
