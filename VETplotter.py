@@ -119,7 +119,7 @@ for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
-  after = bbh_trigs.veto(vetosegs)
+  after_trigs = bbh_trigs.veto(vetosegs)
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
