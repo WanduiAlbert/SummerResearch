@@ -50,7 +50,8 @@ bbh_trigs = bbh_trigs.vetoed(segments)
 #bbh_trigs.sort(key=lambda x: x.end_time + x.end_time_ns * 1.0e-9)
 
 # We need to extract the chirp mass and the end times for these triggers
-end_times = np.array(bbh_trigs.get_end())
+end_times = np.array(bbh_trigs.getColumnByName('peak_time')[:]) +\
+    np.array(bbh_trigs.getColumnByName('peak_time_ns')[:]) * 1.0e-9
 
 m1 = np.array(bbh_trigs.getColumnByName('mass1')[:])
 m2= np.array(bbh_trigs.getColumnByName('mass2')[:])
@@ -100,7 +101,6 @@ t1  = time.time()
 print "All the Omicron triggers for %d channels loaded." %len(omic_trigger_tables)
 print "This took %f seconds to run to completion\n" %(t1 - t0)
 
-
 # ---------------------------------------------------------------------------- #
 # Now let's calculate the offsets between the BBH and Omicron triggers.
 # For each channel, we will make a two-dimensional array of repeated Omicron
@@ -132,11 +132,9 @@ omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(omic_peaktimes, end_times, veto_segs):
-  for peaktime in omic_peaktimes:
-    trigs = np.where(np.abs(end_times - peaktime) <= window/2.0)[0]
-    for index in trigs:
-      veto_segs.append((end_times[index] - window/2.0,\
-          end_times[index] + window/2.0))
+  for endtime in end_times:
+    if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
+      veto_segs.append((endtime - window/2.0, endtime + window/2.0))
 
 print "Working on the first channel now...\n"
 veto_segs = []
