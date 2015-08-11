@@ -137,7 +137,7 @@ def get_vetotimes(omic_peaktimes, end_times, veto_segs):
     if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
       veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
-for i in len(channels):
+for i in xrange(len(channels)):
   omic_peaktimes = peaktime_all_channels[i] # one channel at a time!
 
   print "Working on channel %d now...\n" %i
@@ -158,7 +158,7 @@ for i in len(channels):
   print "Write the segments to file\n"
   grp = f.create_group('%s' %channels[i])
   SegmentList.write(veto_segs, grp, 'vetosegs')
-  f.close()
   print "All done!"
 
+f.close()
 print "Finished computing the offsets for all the channels!!!! Wooohoo!!!\n"
