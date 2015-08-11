@@ -140,7 +140,7 @@ for i in xrange(Nchannels):
   ax.set_ylabel('Counts (N)')
   ax.set_title('L1 Veto histogram for channel %s' %channels[i])
   plt.legend()
-  plt.xlim(1,1e5)
+  plt.xlim(5.5, np.max(snr))
   plt.grid(True, which="both")
   plt.savefig('%s_veto.png' %channels[i])
   plt.close()
