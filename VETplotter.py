@@ -98,6 +98,7 @@ window = 2.0
 import h5py
 f = h5py.File('vetosegments.hdf5', 'r')
 
+snr = np.array(bbh_trigs.getColumnByName('snr')[:])
 # ---------------------------------------------------------------------------- #
 # First we will obtain the relevant metrics for all the channels and store them
 # in a numpy array
@@ -109,7 +110,7 @@ eff_over_dt = get_metric('efficiency/deadtime')
 usep = get_metric('use percentage')
 loudbysnr = get_metric('loudest event by snr')
 
-mydtypes = [('channel', str), ('efficiency', float), ('deadtime', float),\
+mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
     ('efficiency_over_deadtime',float), ('use_percentage',float),\
     ('loudest_event', float)]
 
@@ -120,6 +121,7 @@ for i in xrange(Nchannels):
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
   after_trigs = bbh_trigs.veto(vetosegs)
+  after_snr = np.array(after_trigs.getColumnByName('snr')[:])
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
@@ -128,16 +130,18 @@ for i in xrange(Nchannels):
       loudbysnr(myflag, bbh_trigs).value)
 
   # Now do the plotting
-  plt.figure()
-  plot = bbh_trigs.hist('snr', label='Before', \
-      histtype='step', log=True, logbins=True)
-  after_trigs.hist('snr', label='After', \
-      histtype='step', log=True, logbins=True)
-  plot.set_xlabel('Signal-to-noise ratio (SNR)')
-  plot.set_ylabel('Counts (N)')
-  plot.set_title('Veto histogram for channel %s' %channels[i])
+  plt.figure(figsize=(12,10))
+  bins = np.logspace(np.log10(5.5), np.log10(np.max(snr)), 50)
+  labels = ['Before \nNTrigs=%d'%len(snr), 'After \nNTrigs=%d'%len(after_snr)]
+  plt.hist([snr,after_snr], label=labels, bins=bins, histtype='step', log=True,\
+      color=['b','r'])
+  ax = plt.gca()
+  ax.set_xlabel('Signal-to-noise ratio (SNR)')
+  ax.set_ylabel('Counts (N)')
+  ax.set_title('L1 Veto histogram for channel %s' %channels[i])
   plt.legend()
-  plt.grid()
+  plt.xlim(1,1e5)
+  plt.grid(True, which="both")
   plt.savefig('%s_veto.png' %channels[i])
   plt.close()
 
