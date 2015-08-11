@@ -50,8 +50,8 @@ bbh_trigs = bbh_trigs.vetoed(segments)
 #bbh_trigs.sort(key=lambda x: x.end_time + x.end_time_ns * 1.0e-9)
 
 # We need to extract the chirp mass and the end times for these triggers
-end_times = np.array(bbh_trigs.getColumnByName('end_time')[:]) +\
-    np.array(bbh_trigs.getColumnByName('end_time_ns')[:]) * 1.0e-9
+end_times = np.array(bbh_trigs.getColumnByName('end_time')[:], dtype=float) +\
+    np.array(bbh_trigs.getColumnByName('end_time_ns')[:], dtype=float) * 1.0e-9
 
 m1 = np.array(bbh_trigs.getColumnByName('mass1')[:])
 m2= np.array(bbh_trigs.getColumnByName('mass2')[:])
@@ -117,8 +117,8 @@ NumBBH = len(end_times)
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
 peaktime_all_channels = map(lambda x: \
-    np.array(x.getColumnByName('peak_time')[:]) + \
-    np.array(x.getColumnByName('peak_time_ns')[:]) * 1.0e-9,\
+    np.array(x.getColumnByName('peak_time')[:], dtype=float) + \
+    np.array(x.getColumnByName('peak_time_ns')[:], dtype=float) * 1.0e-9,\
     omic_trigger_tables)
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
@@ -161,7 +161,6 @@ print "This took %f seconds to run to completion\n" %(t1 - t0)
 #  veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
 #
 print "All offsets for the first channel completed.Coalesce the segments now\n"
-veto_segs = np.array(veto_segs, dtype=np.float)
 veto_segs = SegmentList(veto_segs)
 # Merge contiguous veto sections and sort the list of segments
 veto_segs.coalesce()
