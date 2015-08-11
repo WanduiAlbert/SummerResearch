@@ -128,7 +128,8 @@ peaktime_all_channels = map(lambda x: \
 # of the resulting array is (NumOmicron, NumBBH). Each column represents the
 # offsets between the Omicron triggers and a single BBH trigger end time.
 window = 2.0
-omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
+import h5py
+f = h5py.File('vetosegments.hdf5', 'w')
 
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(omic_peaktimes, end_times, veto_segs):
@@ -136,42 +137,28 @@ def get_vetotimes(omic_peaktimes, end_times, veto_segs):
     if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
       veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
-print "Working on the first channel now...\n"
-veto_segs = []
-t0 = time.time()
-get_vetotimes(omic_peaktimes, end_times, veto_segs)
-t1 = time.time()
-print "This took %f seconds to run to completion\n" %(t1 - t0)
+for i in len(channels):
+  omic_peaktimes = peaktime_all_channels[i] # one channel at a time!
 
-#def get_vetotimes(bbhtime, omic_peaktimes):
-#  vetosegs = []
-#  # It is interesting to note that omic_peaktimes - bbhtime works but
-#  # bbhtime-omic_peaktimes doesn't. This symmetry is broken by the fact that
-#  # the subtraction operator for LIGOTimeGPS is already overloaded. So I chose
-#  # to do the omic-bbh since we will be taking the absolute value.
-#  # Alternatively, you could np.array(bbhtime)
-#  if np.any(np.abs(omic_peaktimes - bbhtime) <= window/2.0):
-#    vetosegs += [Segment(bbhtime-window/2.0, bbhtime+window/2.0)]
-#  return vetosegs
-#
-#print "Working on the first channel now...\n"
-#veto_segs = []
-#for i, bbhtime in enumerate(end_times):
-#  print "Trigger %d \n" %i
-#  veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
-#
-print "All offsets for the first channel completed.Coalesce the segments now\n"
-veto_segs = SegmentList(veto_segs)
-# Merge contiguous veto sections and sort the list of segments
-veto_segs.coalesce()
+  print "Working on channel %d now...\n" %i
+  veto_segs = []
+  t0 = time.time()
+  get_vetotimes(omic_peaktimes, end_times, veto_segs)
+  t1 = time.time()
+  print "This took %f seconds to run to completion\n" %(t1 - t0)
 
-# Write all the segments to disk. Read in the [0, 2] columns to recover the data
-# We will use h5py to write out all the segments in groups organized by the name
-# of the channel
-print "Write the segments to file\n"
-import h5py
-f = h5py.File('vetosegments.hdf5', 'w')
-grp = f.create_group('%s' %channels[0])
-SegmentList.write(veto_segs, grp, 'vetosegs')
-f.close()
-print "All done!"
+  print "Offsets calculated. Coalesce the segments now\n"
+  veto_segs = SegmentList(veto_segs)
+  # Merge contiguous veto sections and sort the list of segments
+  veto_segs.coalesce()
+
+  # Write all the segments to disk. Read in the [0, 2] columns to recover the data
+  # We will use h5py to write out all the segments in groups organized by the name
+  # of the channel
+  print "Write the segments to file\n"
+  grp = f.create_group('%s' %channels[i])
+  SegmentList.write(veto_segs, grp, 'vetosegs')
+  f.close()
+  print "All done!"
+
+print "Finished computing the offsets for all the channels!!!! Wooohoo!!!\n"
