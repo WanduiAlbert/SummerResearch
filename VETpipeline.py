@@ -14,6 +14,7 @@ from  gwpy.time import LIGOTimeGPS
 from gwpy.toolkits.vet import (get_triggers,get_segments,get_metric)
 
 import glob, os
+
 # Save all the channels in a python script
 channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
 "PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
@@ -129,22 +130,18 @@ peaktime_all_channels = map(lambda x: \
 window = 2.0
 omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 
-# Function that constructs a veto segment. Used with map
-def get_vetoseg(index):
-  return Segment(end_times[index] - window/2.0,end_times[index] + window/2.0)
-
 # Function that gets the veto time for a single bbhtime
-def get_vetotimes(peaktime, end_times):
-  vetosegs = []
-  trigs = np.where(np.abs(end_times - peaktime) <= window/2.0)[0]
-  return map(get_vetoseg, trigs)
+def get_vetotimes(omic_peaktimes, end_times, veto_segs):
+  for peaktime in omic_peaktimes:
+    trigs = np.where(np.abs(end_times - peaktime) <= window/2.0)[0]
+    for index in trigs:
+      veto_segs.append((end_times[index] - window/2.0,\
+          end_times[index] + window/2.0))
 
 print "Working on the first channel now...\n"
-all_veto_segs = []
+veto_segs = []
 t0 = time.time()
-for i, peaktime in enumerate(omic_peaktimes):
-  print "Omicron Trigger: %d" %i
-  all_veto_segs += get_vetotimes(peaktime, end_times)
+get_vetotimes(omic_peaktimes, end_times, veto_segs)
 t1 = time.time()
 print "This took %f seconds to run to completion\n" %(t1 - t0)
 
@@ -160,15 +157,15 @@ print "This took %f seconds to run to completion\n" %(t1 - t0)
 #  return vetosegs
 #
 #print "Working on the first channel now...\n"
-#all_veto_segs = []
+#veto_segs = []
 #for i, bbhtime in enumerate(end_times):
 #  print "Trigger %d \n" %i
-#  all_veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
+#  veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
 #
 print "All offsets for the first channel completed.Coalesce the segments now\n"
-all_veto_segs = SegmentList(all_veto_segs)
+veto_segs = SegmentList(veto_segs)
 # Merge contiguous veto sections and sort the list of segments
-all_veto_segs.coalesce()
+veto_segs.coalesce()
 
 # Write all the segments to disk. Read in the [0, 2] columns to recover the data
 # We will use h5py to write out all the segments in groups organized by the name
@@ -177,6 +174,6 @@ print "Write the segments to file\n"
 import h5py
 f = h5py.File('vetosegments.hdf5', 'w')
 grp = f.create_group('%s' %channels[0])
-SegmentList.write(all_veto_segs, grp, 'vetosegs')
+SegmentList.write(veto_segs, grp, 'vetosegs')
 f.close()
 print "All done!"
