@@ -103,7 +103,7 @@ eff = get_metric('efficiency')
 dt = get_metric('deadtime')
 eff_over_dt = get_metric('efficiency/deadtime')
 usep = get_metric('use percentage')
-loudbysnr = get_metric('loudest event by_snr')
+loudbysnr = get_metric('loudest event by snr')
 
 mydtypes = [('channel', str), ('efficiency', float), ('deadtime', float),\
     ('efficiency_over_deadtime',float), ('use_percentage',float),\
