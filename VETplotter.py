@@ -102,11 +102,32 @@ f = h5py.File('vetosegments.hdf5', 'r')
 # First we will obtain the relevant metrics for all the channels and store them
 # in a numpy array
 
+# Metrics being considered
+eff = get_metric('efficiency')
+dt = get_metric('deadtime')
+eff_over_dt = get_metric('efficiency/deadtime')
+usep = get_metric('use percentage')
+loudbysnr = get_metric('loudest event by snr')
+
+mydtypes = [('channel', str), ('efficiency', float), ('deadtime', float),\
+    ('efficiency_over_deadtime',float), ('use_percentage',float),\
+    ('loudest_event', float)]
+
+statistics = np.zeros((Nchannels), dtype=mydtypes)
 # Make some basic histograms
 for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
+  omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
   after = bbh_trigs.veto(vetosegs)
+  myflag = DataQualityFlag()
+  myflag.active = vetosegs
+  myflag.known = segments
+  statistics[i] = (channels[i], eff(myflag, bbh_trigs).value, dt(myflag).value,\
+      eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
+      loudbysnr(myflag, bbh_trigs).value)
+
+  # Now do the plotting
   plt.figure()
   plot = bbh_trigs.hist('snr', label='Before', \
       histtype='step', log=True, logbins=True)
@@ -120,33 +141,11 @@ for i in xrange(Nchannels):
   plt.savefig('%s_veto.png' %channels[i])
   plt.close()
 
-# Metrics being considered
-#eff = get_metric('efficiency')
-#dt = get_metric('deadtime')
-#eff_over_dt = get_metric('efficiency/deadtime')
-#usep = get_metric('use percentage')
-#loudbysnr = get_metric('loudest event by snr')
-#
-#mydtypes = [('channel', str), ('efficiency', float), ('deadtime', float),\
-#    ('efficiency_over_deadtime',float), ('use_percentage',float),\
-#    ('loudest_event', float)]
-#
-#statistics = np.zeros((Nchannels), dtype=mydtypes)
-#
-#for i in xrange(Nchannels):
-#  omic_trigs= omic_trigger_tables[i]
-#  key = channels[i] +'/vetosegs'
-#  vetosegs= SegmentList.read(f, key)
-#  myflag = DataQualityFlag()
-#  myflag.active = vetosegs
-#  myflag.known = segments
-#  statistics[i] = (channels[i], eff(myflag, bbh_trigs).value, dt(myflag).value,\
-#      eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
-#      loudbysnr(myflag, bbh_trigs).value)
-#
+
 ## Write this data to a file
-#np.savetxt('vetostats.txt', statistics, delimiter=' ',\
-#    header='channel efficiency deadtime efficiency/deadtime use_percentage loudest_event')
+fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
+np.savetxt('vetostats.txt', statistics, fmt=fmt, delimiter=' ',\
+    header='channel efficiency deadtime efficiency/deadtime use_percentage loudest_event')
 
 print "All done!!!!"
 f.close()
