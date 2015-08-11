@@ -161,6 +161,7 @@ print "This took %f seconds to run to completion\n" %(t1 - t0)
 #  veto_segs += get_vetotimes(bbhtime, omic_peaktimes)
 #
 print "All offsets for the first channel completed.Coalesce the segments now\n"
+veto_segs = np.array(veto_segs, dtype=np.float)
 veto_segs = SegmentList(veto_segs)
 # Merge contiguous veto sections and sort the list of segments
 veto_segs.coalesce()
