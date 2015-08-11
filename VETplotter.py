@@ -118,7 +118,7 @@ for i in xrange(Nchannels):
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
-  statistics[i] = (channels[i], eff(myflag, bbh_trigs).value, dt(myflag,bbh_trigs).value,\
+  statistics[i] = (channels[i], eff(myflag, bbh_trigs).value, dt(myflag).value,\
       eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
       loudbysnr(myflag, bbh_trigs).value)
 
