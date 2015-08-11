@@ -50,8 +50,8 @@ bbh_trigs = bbh_trigs.vetoed(segments)
 #bbh_trigs.sort(key=lambda x: x.end_time + x.end_time_ns * 1.0e-9)
 
 # We need to extract the chirp mass and the end times for these triggers
-end_times = np.array(bbh_trigs.getColumnByName('peak_time')[:]) +\
-    np.array(bbh_trigs.getColumnByName('peak_time_ns')[:]) * 1.0e-9
+end_times = np.array(bbh_trigs.getColumnByName('end_time')[:]) +\
+    np.array(bbh_trigs.getColumnByName('end_time_ns')[:]) * 1.0e-9
 
 m1 = np.array(bbh_trigs.getColumnByName('mass1')[:])
 m2= np.array(bbh_trigs.getColumnByName('mass2')[:])
