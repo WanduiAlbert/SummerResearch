@@ -134,7 +134,7 @@ omic_peaktimes = peaktime_all_channels[0] # one channel at a time!
 def get_vetotimes(omic_peaktimes, end_times, veto_segs):
   for endtime in end_times:
     if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
-      veto_segs.append((endtime - window/2.0, endtime + window/2.0))
+      veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
 print "Working on the first channel now...\n"
 veto_segs = []
