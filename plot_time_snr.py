@@ -62,7 +62,7 @@ for cachefile in cachelist:
   #trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda t: t.peak_frequency < 100)
 
   #filter to select for triggers with frequency <100 and snr <100
-  trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda t: t.peak_frequency < 100 and t.snr < 100)
+  trigs = SnglBurstTable.read(cache, verbose=True)
 
 
   ### check triggers read successfully
@@ -81,12 +81,12 @@ for cachefile in cachelist:
 
   ######## plot triggers and save plot
 
-  plot = trigs2.plot('time', 'central_freq', color='snr', edgecolor='none')
+  plot = trigs2.plot('time', 'snr', edgecolor='none')
   plot.set_ylabel('Central Frequency [Hz]')
   plot.set_yscale('log')
   title = r'L1:'+tag+' triggers'
   # Need to format _ to \_ for latex compatibility
   title  = title.replace('_', '\_')
   plot.set_title(title)
-  plot.add_colorbar(label='Signal-to-noise ratio')
-  plt.savefig('%s_snr_time.png' %tag)
+  # plot.add_colorbar(label='Signal-to-noise ratio')
+  plt.savefig('%s_aux_snr_time.png' %tag)
