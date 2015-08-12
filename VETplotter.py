@@ -133,11 +133,13 @@ for i in xrange(Nchannels):
   plt.figure(figsize=(12,10))
   bins = np.logspace(np.log10(5.5), np.log10(np.max(snr)), 50)
   labels = ['Before \nNTrigs=%d'%len(snr), 'After \nNTrigs=%d'%len(after_snr)]
-  plt.hist([snr,after_snr], label=labels, bins=bins, histtype='step', log=True,\
+  plt.hist([snr,after_snr], label=labels, bins=bins, histtype='step',\
       color=['b','r'])
   ax = plt.gca()
   ax.set_xlabel('Signal-to-noise ratio (SNR)')
   ax.set_ylabel('Counts (N)')
+  ax.set_yscale('log', nonposy='clip')
+  ax.set_xscale('log', nonposx='clip')
   ax.set_title('L1 Veto histogram for channel %s' %channels[i])
   plt.legend()
   plt.xlim(5.5, np.max(snr))
