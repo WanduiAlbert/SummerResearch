@@ -81,7 +81,7 @@ for cachefile in cachelist:
 
   ######## plot triggers and save plot
 
-  plot = trigs2.plot('time', 'snr', edgecolor='none')
+  plot = trigs.plot('time', 'snr', edgecolor='none')
   plot.set_ylabel('Central Frequency [Hz]')
   plot.set_yscale('log')
   title = r'L1:'+tag+' triggers'
