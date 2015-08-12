@@ -19,6 +19,8 @@ from gwpy.segments import SegmentList
 
 from pylal import ligolw_bucluster,snglcluster
 
+from gwpy.toolkits.vet import get_triggers
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -45,12 +47,17 @@ cachelist = glob.glob(args.cachedir + '*.cache')
 
 tag = ''
 
+########## apply segment list (of good times)
+
+segments = SegmentList.read('L1_ER7_segments.txt')
+
 for cachefile in cachelist:
   ### open trigger cache
   # Make a tag for the saving the plot as well as the title
   # The tag is the name of the channel extracted from the path
   tag = cachefile.split('/')[-1]
   tag = tag.split('.')[0]
+  tag = tag.replace('_Omicron','')
  
   print ('\n\nReading file: %s now ...\n' % tag)
   with open(cachefile, 'r') as fobj:
@@ -62,7 +69,7 @@ for cachefile in cachelist:
   #trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda t: t.peak_frequency < 100)
 
   #filter to select for triggers with frequency <100 and snr <100
-  trigs = SnglBurstTable.read(cache, verbose=True)
+  trigs = get_triggers('L1:'+tag, 'sngl_burst', segments, cache)
 
 
   ### check triggers read successfully
@@ -71,13 +78,6 @@ for cachefile in cachelist:
                 file=sys.stderr)
   else:
       print('    %d triggers read' % len(trigs))
-      
-
-  ########## apply segment list (of good times)
-
-  seglist = SegmentList.read('L1_ER7_segments.txt')
-  trigs2 = trigs.vetoed(seglist)
-
 
   ######## plot triggers and save plot
 
@@ -86,7 +86,7 @@ for cachefile in cachelist:
   plot.set_yscale('log')
   title = r'L1:'+tag+' triggers'
   # Need to format _ to \_ for latex compatibility
-  title  = title.replace('_', '\_')
+  title  = title.replace('_', '{\_}')
   plot.set_title(title)
   # plot.add_colorbar(label='Signal-to-noise ratio')
   plt.savefig('%s_aux_snr_time.png' %tag)
