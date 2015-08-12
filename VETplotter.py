@@ -127,7 +127,7 @@ def downtime(vetosegs, segments, channel):
   plot = myflag.plot()
   plot.set_title(r'Active and vetoed segments for %s' %channel)
   plot.savefig(r'%s_downtime.png'%channel)
- 
+
 def histogram(snr, after_snr, channel):
   plt.figure(figsize=(12,10))
   bins = np.logspace(np.log10(5.5), np.log10(np.max(snr)), 50)
@@ -156,9 +156,10 @@ def time_snr(bbh_trigs, vetoed_trigs, channel):
   plot.set_yscale('log',nonposy='clip')
   plot.set_title(r'Detector=%s, Veto Channel=%s' %(ifo, channel))
   ax = plot.gca()
-  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_main_time_snr.png' %save)
+  plot.savefig(r'%s_main_time_snr.png' %save, bbox_inches='tight',\
+    bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
   labels = [r"All %d" %len(omic_trigs), r"Used %d" %len(vetoed_omic_trigs)]
@@ -172,7 +173,8 @@ def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
   ax = plot.gca()
   ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_time_freq.png' %save)
+  plot.savefig(r'%s_aux_time_freq.png' %save, bbox_inches='tight',\
+    bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel):
   labels = [r"All %d" %len(omic_trigs), r"Used %d" %len(vetoed_omic_trigs)]
@@ -186,9 +188,10 @@ def aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel):
   plot.set_yscale('log',nonposy='clip')
   plot.set_yscale('log', nonposx='clip')
   ax = plot.gca()
-  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_freq_snr.png' %save)
+  plot.savefig(r'%s_aux_freq_snr.png' %save, bbox_inches='tight',\
+    bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   labels = [r"All %d" %len(omic_trigs), r"Used %d" %len(vetoed_omic_trigs)]
@@ -200,9 +203,10 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   plot.set_yscale('log',nonposy='clip')
   plot.set_title(r'Detector=%s, Veto Channel=%s' %(ifo, channel))
   ax = plot.gca()
-  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_time_snr.png' %save)
+  plot.savefig(r'%s_aux_time_snr.png' %save, bbox_inches='tight',\
+    bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 #statistics = np.zeros((Nchannels), dtype=mydtypes)
 # Make some basic histograms
