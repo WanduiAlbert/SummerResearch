@@ -19,6 +19,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+from gwpy.plotter import EventTablePlot
+
 # Save all the channels in a python script
 channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
 "PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
@@ -99,37 +101,26 @@ import h5py
 f = h5py.File('vetosegments.hdf5', 'r')
 
 snr = np.array(bbh_trigs.getColumnByName('snr')[:])
-# ---------------------------------------------------------------------------- #
-# First we will obtain the relevant metrics for all the channels and store them
-# in a numpy array
 
-# Metrics being considered
-eff = get_metric('efficiency')
-dt = get_metric('deadtime')
-eff_over_dt = get_metric('efficiency/deadtime')
-usep = get_metric('use percentage')
-loudbysnr = get_metric('loudest event by snr')
-
-mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
-    ('efficiency_over_deadtime',float), ('use_percentage',float),\
-    ('loudest_event', float)]
-
-statistics = np.zeros((Nchannels), dtype=mydtypes)
-# Make some basic histograms
-for i in xrange(Nchannels):
-  key = channels[i] +'/vetosegs'
-  omic_trigs= omic_trigger_tables[i]
-  vetosegs= SegmentList.read(f, key)
-  after_trigs = bbh_trigs.veto(vetosegs)
-  after_snr = np.array(after_trigs.getColumnByName('snr')[:])
+# Defining the functions for all 9 plots and the summary statistics
+def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segments):
+  # Metrics being considered
+  eff = get_metric('efficiency')
+  dt = get_metric('deadtime')
+  eff_over_dt = get_metric('efficiency/deadtime')
+  usep = get_metric('use percentage')
+  loudbysnr = get_metric('loudest event by snr')
+  mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
+      ('efficiency_over_deadtime',float), ('use_percentage',float),\
+      ('loudest_event', float)]
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
-  statistics[i] = (channels[i], eff(myflag, bbh_trigs).value, dt(myflag).value,\
+  statistics[i] = (channel, eff(myflag, bbh_trigs).value, dt(myflag).value,\
       eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
       loudbysnr(myflag, bbh_trigs).value)
 
-  # Now do the plotting
+def histogram(snr, after_snr, channel):
   plt.figure(figsize=(12,10))
   bins = np.logspace(np.log10(5.5), np.log10(np.max(snr)), 50)
   labels = ['Before \nNTrigs=%d'%len(snr), 'After \nNTrigs=%d'%len(after_snr)]
@@ -140,18 +131,53 @@ for i in xrange(Nchannels):
   ax.set_ylabel('Counts (N)')
   ax.set_yscale('log', nonposy='clip')
   ax.set_xscale('log', nonposx='clip')
-  ax.set_title('L1 Veto histogram for channel %s' %channels[i])
+  ax.set_title('%s histogram for channel %s' %(ifo, channel))
   plt.legend()
   plt.xlim(5.5, np.max(snr))
   plt.grid(True, which="both")
-  plt.savefig('%s_veto.png' %channels[i])
+  plt.savefig('%s_histogram.png' %channel)
   plt.close()
 
+def time_snr(bbh_trigs, vetosegs, channel):
+  plot = EventTablePlot(bbh_trigs, 'time', 'snr')
+  ax = plot.gca()
+  vetoed= bbh_trigs.vetoed(vetosegs)
+  plot.add_table(vetoed, 'time', 'snr',ax=ax)
+  plot.set_ylabel('SNR')
+  plot.set_title('%s' %channel)
+  plot.savefig('%s_main_time_snr.png' %channel)
+
+def downtime(vetosegs, segments, channel):
+  myflag = DataQualityFlag()
+  myflag.active = vetosegs
+  myflag.known = segments
+  plot = myflag.plot()
+  plot.set_title('Active and vetoed segments for %s' %channel)
+  plot.savefig('%s_downtime.png'%channel)
+
+statistics = np.zeros((Nchannels), dtype=mydtypes)
+# Make some basic histograms
+for i in xrange(Nchannels[0]):
+  key = channels[i] +'/vetosegs'
+  omic_trigs= omic_trigger_tables[i]
+  vetosegs= SegmentList.read(f, key)
+  after_trigs = bbh_trigs.veto(vetosegs)
+  after_snr = np.array(after_trigs.getColumnByName('snr')[:])
+  #summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+  # Now do the plotting
+  # histogram(snr, after_snr, channels[i])
+  # time_freq(bbh_trigs, vetosegs, channels[i])
+  time_snr(bbh_trigs, vetosegs, channels[i])
+  # time_centralfreq(bbh_trigs, vetosegs, omic_trigs, channels[i])
+  # aux_time_freq(omic_trigs, vetosegs, channels[i])
+  # aux_snr_freq(omic_trigs, vetosegs, channels[i])
+  # aux_snr_time(omic_trigs,vetosegs, channels[i])
+  downtime(vetosegs, segments, channels[i])
 
 ## Write this data to a file
-fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
-np.savetxt('vetostats.txt', statistics, fmt=fmt, delimiter=' ',\
-    header='channel efficiency deadtime efficiency/deadtime use_percentage loudest_event')
+#fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
+#np.savetxt('vetostats.txt', statistics, fmt=fmt, delimiter=' ',\
+#    header='channel efficiency deadtime efficiency/deadtime use_percentage loudest_event')
 
 print "All done!!!!"
 f.close()
