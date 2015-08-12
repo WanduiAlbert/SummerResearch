@@ -138,13 +138,17 @@ def histogram(snr, after_snr, channel):
   plt.savefig('%s_histogram.png' %channel)
   plt.close()
 
-def time_snr(bbh_trigs, vetosegs, channel):
-  plot = EventTablePlot(bbh_trigs, 'time', 'snr')
-  ax = plot.gca()
-  vetoed= bbh_trigs.vetoed(vetosegs)
-  plot.add_table(vetoed, 'time', 'snr',ax=ax)
+def time_snr(bbh_trigs, vetoed_trigs, channel):
+  labels = ["All %d" %len(bbh_trigs), "Vetoed %d" %len(vetoed_trigs)]
+  plot = bbh_trigs.plot('time', 'snr',\
+      edgecolor='none', label=labels[0])
+  plot.add_table(vetoed_trigs, 'time', 'snr',\
+      edgecolor='none', label=labels[1],c='r')
   plot.set_ylabel('SNR')
-  plot.set_title('%s' %channel)
+  plot.set_yscale('log',nonposy='clip')
+  plot.set_title('Detector=%s Veto Channel=%s' %(ifo, channel))
+  ax = plot.gca()
+  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   plot.savefig('%s_main_time_snr.png' %channel)
 
 def downtime(vetosegs, segments, channel):
@@ -155,24 +159,65 @@ def downtime(vetosegs, segments, channel):
   plot.set_title('Active and vetoed segments for %s' %channel)
   plot.savefig('%s_downtime.png'%channel)
 
+def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
+  labels = ["All %d" %len(omic_trigs), "Used %d" %len(vetoed_omic_trigs)]
+  plot = omic_trigs.plot('time', 'central_freq',\
+      edgecolor='none', label=labels[0])
+  plot.add_table(vetoed_omic_trigs, 'time', 'central_freq',\
+      edgecolor='none', label=labels[1],c='r')
+  plot.set_ylabel('Central Frequency [Hz]')
+  plot.set_title('Detector=%s Veto Channel=%s' %(ifo, channel))
+  plot.set_yscale('log',nonposy='clip')
+  ax = plot.gca()
+  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  plot.savefig('%s_aux_time_freq.png' %channel)
+
+def aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel):
+  labels = ["All %d" %len(omic_trigs), "Used %d" %len(vetoed_omic_trigs)]
+  plot = omic_trigs.plot('central_freq','snr',\
+      edgecolor='none', label=labels[0])
+  plot.add_table(vetoed_omic_trigs,'central_freq','snr',\
+      edgecolor='none', label=labels[1],c='r')
+  plot.set_xlabel('Central Frequency [Hz]')
+  plot.set_ylabel('SNR')
+  plot.set_title('Detector=%s Veto Channel=%s' %(ifo, channel))
+  plot.set_yscale('log',nonposy='clip')
+  plot.set_yscale('log', nonposx='clip')
+  ax = plot.gca()
+  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  plot.savefig('%s_aux_freq_snr.png' %channel)
+
+def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
+  labels = ["All %d" %len(omic_trigs), "Used %d" %len(vetoed_omic_trigs)]
+  plot = EventTablePlot(omic_trigs, 'time', 'snr',\
+      edgecolor='none', label=labels[0])
+  plot.add_table(vetoed_omic_trigs, 'time', 'snr',\
+      edgecolor='none', label=labels[1],c='r')
+  plot.set_ylabel('SNR')
+  plot.set_yscale('log',nonposy='clip')
+  plot.set_title('Detector=%s Veto Channel=%s' %(ifo, channel))
+  ax = plot.gca()
+  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  plot.savefig('%s_aux_time_snr.png' %channel)
+
 statistics = np.zeros((Nchannels), dtype=mydtypes)
 # Make some basic histograms
-for i in xrange(Nchannels[0]):
+for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
   after_trigs = bbh_trigs.veto(vetosegs)
   after_snr = np.array(after_trigs.getColumnByName('snr')[:])
+  vetoed_trigs= bbh_trigs.vetoed(vetosegs)
+  vetoed_omic_trigs= omic_trigs.vetoed(vetosegs)
   #summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
   # Now do the plotting
   # histogram(snr, after_snr, channels[i])
-  # time_freq(bbh_trigs, vetosegs, channels[i])
-  time_snr(bbh_trigs, vetosegs, channels[i])
-  # time_centralfreq(bbh_trigs, vetosegs, omic_trigs, channels[i])
-  # aux_time_freq(omic_trigs, vetosegs, channels[i])
-  # aux_snr_freq(omic_trigs, vetosegs, channels[i])
-  # aux_snr_time(omic_trigs,vetosegs, channels[i])
-  downtime(vetosegs, segments, channels[i])
+  time_snr(bbh_trigs, vetoed_trigs, channels[i])
+  aux_time_freq(omic_trigs, vetosegs, channels[i])
+  aux_snr_freq(omic_trigs, vetosegs, channels[i])
+  aux_snr_time(omic_trigs,vetosegs, channels[i])
+  # downtime(vetosegs, segments, channels[i])
 
 ## Write this data to a file
 #fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
