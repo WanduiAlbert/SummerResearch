@@ -213,11 +213,16 @@ for i in xrange(Nchannels):
   #summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
   # Now do the plotting
   # histogram(snr, after_snr, channels[i])
+  print "Working on the time snr plot now \n"
   time_snr(bbh_trigs, vetoed_trigs, channels[i])
+  print "Working on the time frequency plot for the aux channel now \n"
   aux_time_freq(omic_trigs, vetosegs, channels[i])
+  print "Working on the snr frequency plot for the aux channel now \n"
   aux_snr_freq(omic_trigs, vetosegs, channels[i])
+  print "Working on the snr time plot for the aux channel now \n"
   aux_snr_time(omic_trigs,vetosegs, channels[i])
   # downtime(vetosegs, segments, channels[i])
+  print "Done! Moving on to the next channel!!!!\n"
 
 ## Write this data to a file
 #fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
