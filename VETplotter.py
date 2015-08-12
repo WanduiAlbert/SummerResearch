@@ -171,7 +171,7 @@ def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
   plot.set_title(r'Detector=%s, Veto Channel=%s' %(ifo, channel))
   plot.set_yscale('log',nonposy='clip')
   ax = plot.gca()
-  ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+  lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
   plot.savefig(r'%s_aux_time_freq.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
