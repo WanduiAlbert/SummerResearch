@@ -200,7 +200,8 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   plot.savefig('%s_aux_time_snr.png' %channel)
 
-statistics = np.zeros((Nchannels), dtype=mydtypes)
+#statistics = np.zeros((Nchannels), dtype=mydtypes)
+# Make some basic histograms
 for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
