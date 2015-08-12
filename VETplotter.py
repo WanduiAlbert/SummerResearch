@@ -214,6 +214,7 @@ for i in xrange(Nchannels):
   # Now do the plotting
   # histogram(snr, after_snr, channels[i])
   channel= channels[i]
+  channel= channel.replace('_','{\_}')
   print "Working on the time snr plot now \n"
   time_snr(bbh_trigs, vetoed_trigs, channel)
   print "Working on the time frequency plot for the aux channel now \n"
