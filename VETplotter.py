@@ -158,7 +158,7 @@ def time_snr(bbh_trigs, vetoed_trigs, channel):
   ax = plot.gca()
   lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_main_time_snr.png' %save, bbox_inches='tight',\
+  plot.savefig(r'%s_main_time_snr.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
@@ -173,7 +173,7 @@ def aux_time_freq(omic_trigs, vetoed_omic_trigs, channel):
   ax = plot.gca()
   ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_time_freq.png' %save, bbox_inches='tight',\
+  plot.savefig(r'%s_aux_time_freq.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel):
@@ -190,7 +190,7 @@ def aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel):
   ax = plot.gca()
   lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_freq_snr.png' %save, bbox_inches='tight',\
+  plot.savefig(r'%s_aux_freq_snr.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
@@ -205,7 +205,7 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   ax = plot.gca()
   lgd = ax.legend(loc="upper left", bbox_to_anchor=(1,1))
   save = channel.replace('{\_}', '_')
-  plot.savefig(r'%s_aux_time_snr.png' %save, bbox_inches='tight',\
+  plot.savefig(r'%s_aux_time_snr.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 #statistics = np.zeros((Nchannels), dtype=mydtypes)
