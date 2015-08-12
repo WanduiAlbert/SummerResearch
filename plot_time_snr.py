@@ -69,7 +69,7 @@ for cachefile in cachelist:
   #trigs = SnglBurstTable.read(cache, verbose=True, filt=lambda t: t.peak_frequency < 100)
 
   #filter to select for triggers with frequency <100 and snr <100
-  trigs = get_triggers('L1:'+tag, 'sngl_burst', segments, cache)
+  trigs = get_triggers('L1:'+tag, 'sngl_burst', segments, cache=cache)
 
 
   ### check triggers read successfully
