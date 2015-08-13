@@ -235,6 +235,9 @@ for i in xrange(Nchannels):
   print "Done! Moving on to the next channel!!!!\n"
 
 ## Write this data to a file
+# We first sort our data by efficiency/deadtime, then efficiency
+# and finally deadtime
+statistics.sort(order=["efficiency/deadtime", "deadtime", "efficiency"])
 from astropy.io import ascii
 fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f"}
