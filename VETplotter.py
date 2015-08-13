@@ -224,13 +224,13 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def cumulative_histogram(omic_trigs,vetosegs,channel):
-  plot = omic_trigs.hist('snr', log=True, logbins=True, histtype='stepfilled',\
+  plot = omic_trigs.hist('snr', logbins=True, histtype='stepfilled',\
     color='g', cumulative=True, normed=True)
   plot.set_xlabel('Signal-to-noise ratio (SNR)')
   plot.set_ylabel('Normed Counts')
-  plot.set_yscale('log', nonposy='clip')
+  # plot.set_yscale('log', nonposy='clip')
   plot.set_xscale('log', nonposx='clip')
-  plot.set_title(r'%s Cumulative histogram for channel %s' %(ifo, channel))
+  plot.set_title(r'%s Cumulative histogram for\n channel %s' %(ifo, channel))
   save = channel.replace('{\_}', '_')
   plot.savefig(r'%s_cumulative_histogram.png' %save)
 
@@ -245,7 +245,7 @@ for i in xrange(Nchannels):
   vetosegs= SegmentList.read(f, key)
   vetoed_trigs= bbh_trigs.vetoed(vetosegs)
   vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
-  summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+  # summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
   channel= channels[i]
   channel= channel.replace('_','{\_}')
   cumulative_histogram(omic_trigs,vetosegs,channel)
@@ -265,13 +265,13 @@ for i in xrange(Nchannels):
 ## Write this data to a file
 # We first sort our data by efficiency/deadtime, then efficiency
 # and finally deadtime
-statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
-fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
-  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",'loudest event by snr':"%10.4f"}
-names = ["channel", "efficiency", "deadtime",\
-  "efficiency/deadtime", "use percentage","loudest event by snr"]
-ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
-  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
+# statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
+# fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
+#   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",'loudest event by snr':"%10.4f"}
+# names = ["channel", "efficiency", "deadtime",\
+#   "efficiency/deadtime", "use percentage","loudest event by snr"]
+# ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
+#   comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
 
 print "All done!!!!"
 f.close()
