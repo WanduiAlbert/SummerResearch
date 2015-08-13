@@ -231,7 +231,8 @@ def cumulative_histogram(omic_trigs,vetosegs,channel):
   plot.set_yscale('log', nonposy='clip')
   plot.set_xscale('log', nonposx='clip')
   plot.set_title(r'%s Cumulative histogram for channel %s' %(ifo, channel))
-  plot.savefig(r'%s_cumulative_histogram.png' %channel)
+  save = channel.replace('{\_}', '_')
+  plot.savefig(r'%s_cumulative_histogram.png' %save)
 
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
