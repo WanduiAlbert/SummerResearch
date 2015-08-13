@@ -243,7 +243,7 @@ fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f"}
 names = ["channel", "efficiency", "deadtime", "efficiency/deadtime", "use percentage"]
 ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
-  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ", position_char="=")
+  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
 
 print "All done!!!!"
 f.close()
