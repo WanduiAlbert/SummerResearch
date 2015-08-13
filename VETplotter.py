@@ -1,10 +1,9 @@
 # Import statements
+from __future__ import division
 
 import sys
 
 import numpy as np
-
-from __future__ import division
 
 from gwpy.segments import Segment, SegmentList, DataQualityFlag
 from gwpy.table.lsctables import SnglBurstTable, SnglInspiralTable
