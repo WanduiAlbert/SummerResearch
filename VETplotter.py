@@ -230,7 +230,7 @@ def cumulative_histogram(omic_trigs,vetosegs,channel):
   plot.set_ylabel('Normed Counts')
   # plot.set_yscale('log', nonposy='clip')
   plot.set_xscale('log', nonposx='clip')
-  plot.set_title(r'%s Cumulative histogram for\n channel %s' %(ifo, channel))
+  plot.set_title(r'%s Cumulative histogram for\\ channel %s' %(ifo, channel))
   save = channel.replace('{\_}', '_')
   plot.savefig(r'%s_cumulative_histogram.png' %save)
 
