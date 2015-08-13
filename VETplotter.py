@@ -107,15 +107,20 @@ f = h5py.File('vetosegments.hdf5', 'r')
 
 
 
-# Redefine use percentage
+# Defining some new metrics
 def my_use_percentage(segments,before,after=None):
   """
   Calculate the use percentage as the ratio of the triggers in
   an auxiliary channel used to the total number of triggers in
   the channel. The standard definition checks segments instead.
   """
-  return len(before.vetoed(segments.active))/len(before)
+  return len(before.vetoed(segments.active))/len(before)*100
 register_metric(Metric(my_use_percentage, "my use percentage", unit=Unit('%')))
+
+def get_percentile(before, level):
+  snr = np.array(before.getColumnByName('snr')[:])
+  return np.percentile(snr, level)
+register_metric(Metric(get_percentile, "percentile", unit=None))
 
 # Defining the functions for all 9 plots and the summary statistics
 def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segments):
@@ -125,12 +130,16 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   eff_over_dt = get_metric('efficiency/deadtime')
   usep = get_metric('my use percentage')
   loudbysnr = get_metric('loudest event by snr')
+  get_percentile= get_metric('percentile')
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
   statistics[i] = (channel, eff(myflag, bbh_trigs).value, dt(myflag).value,\
       eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
-      loudbysnr(myflag, bbh_trigs).value)
+      loudbysnr(myflag, bbh_trigs).value, get_percentile(omic_trigs, 95).value,\
+      get_percentile(omic_trigs, 96).value, get_percentile(omic_trigs, 97).value,\
+      get_percentile(omic_trigs, 98).value,get_percentile(omic_trigs, 99).value,\
+      get_percentile(omic_trigs, 99.5).value)
 
 def downtime(vetosegs, segments, channel):
   myflag = DataQualityFlag()
@@ -236,19 +245,21 @@ def cumulative_histogram(omic_trigs,vetosegs,channel):
 
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
-      ('loudest_event', float)]
+      ('loudest_event', float),('95 percent', float),('96 percent', float),\
+      ('97 percent', float),('98 percent', float),('99 percent', float),\
+      ('99.5 percent', float)]
 statistics = np.zeros((Nchannels), dtype=mydtypes)
 # Make some basic histograms
 for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
-  vetoed_trigs= bbh_trigs.vetoed(vetosegs)
-  vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
-  # summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
-  channel= channels[i]
-  channel= channel.replace('_','{\_}')
-  cumulative_histogram(omic_trigs,vetosegs,channel)
+  summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+  # vetoed_trigs= bbh_trigs.vetoed(vetosegs)
+  # vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
+  # channel= channels[i]
+  # channel= channel.replace('_','{\_}')
+  # cumulative_histogram(omic_trigs,vetosegs,channel)
   # Now do the plotting
   # histogram(bbh_trigs, vetosegs, channels[i])
   # print "Working on the time snr plot now \n"
@@ -265,13 +276,17 @@ for i in xrange(Nchannels):
 ## Write this data to a file
 # We first sort our data by efficiency/deadtime, then efficiency
 # and finally deadtime
-# statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
-# fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
-#   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",'loudest event by snr':"%10.4f"}
-# names = ["channel", "efficiency", "deadtime",\
-#   "efficiency/deadtime", "use percentage","loudest event by snr"]
-# ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
-#   comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
+statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
+fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
+  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
+  'loudest event by snr':"%10.4f", "95 percent":"%10.4f","96 percent":"%10.4f",\
+  "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
+  "99.5 percent":"%10.4f"}
+names = ["channel", "efficiency", "deadtime",\
+  "efficiency/deadtime", "use percentage","loudest event by snr","95 percent",\
+  "96 percent","97 percent","98 percent","99 percent","99.5 percent"]
+ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
+  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
 
 print "All done!!!!"
 f.close()
