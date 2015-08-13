@@ -110,9 +110,6 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   eff_over_dt = get_metric('efficiency/deadtime')
   usep = get_metric('use percentage')
   loudbysnr = get_metric('loudest event by snr')
-  mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
-      ('efficiency/deadtime',float), ('use_percentage',float),\
-      ('loudest_event', float)]
   myflag = DataQualityFlag()
   myflag.active = vetosegs
   myflag.known = segments
@@ -208,6 +205,9 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   plot.savefig(r'%s_aux_time_snr.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
+mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
+      ('efficiency/deadtime',float), ('use_percentage',float),\
+      ('loudest_event', float)]
 statistics = np.zeros((Nchannels), dtype=mydtypes)
 # Make some basic histograms
 for i in xrange(Nchannels):
