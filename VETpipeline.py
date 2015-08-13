@@ -160,7 +160,7 @@ def get_vetotimes(omic_peaktimes, end_times, veto_segs):
 percentile = [95,96,97,98,99,99.5]
 
 for j in xrange(6):
-  print "Get the offsets for the %d % percentile.\n" %percentile[j]
+  print "Get the offsets for the %d %% percentile.\n" %percentile[j]
   thresh = f.create_group('%.1f' %percentile[j])
   for i in xrange(len(channels)):
     print "Working on channel %d now...\n" %i
