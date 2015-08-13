@@ -173,7 +173,7 @@ for j in xrange(6):
     # Apply the snr filter to the triggers and get their peaktimes
     selection = filter_threshold(omic_trigs, snr_thresh)
     peaktime = np.array(selection.getColumnByName('peak_time')[:], dtype=float) + \
-      np.array(selection.getColumnByName('peak_time_ns')[:], dtype=float) * 1.0e-9)
+      np.array(selection.getColumnByName('peak_time_ns')[:], dtype=float) * 1.0e-9
     # Now we can calculate the offsets for this channel
     veto_segs = []
     t0 = time.time()
