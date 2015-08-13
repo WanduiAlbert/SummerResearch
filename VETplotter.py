@@ -118,6 +118,11 @@ def my_use_percentage(segments,before,after=None):
 register_metric(Metric(my_use_percentage, "my use percentage", unit=Unit('%')))
 
 def get_percentile(before, level):
+  """
+  Get a percentile level for the snr of the triggers from a channel.
+  This is useful in evaluating appropriate levels at which to set the
+  snr threshold.
+  """
   snr = np.array(before.getColumnByName('snr')[:])
   return np.percentile(snr, level)
 register_metric(Metric(get_percentile, "percentile", unit=None))
