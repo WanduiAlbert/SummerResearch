@@ -245,11 +245,11 @@ for i in xrange(Nchannels):
   vetoed_trigs= bbh_trigs.vetoed(vetosegs)
   vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
   summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
-  cumulative_histogram(omic_trigs,vetosegs,channels[i])
+  channel= channels[i]
+  channel= channel.replace('_','{\_}')
+  cumulative_histogram(omic_trigs,vetosegs,channel)
   # Now do the plotting
   # histogram(bbh_trigs, vetosegs, channels[i])
-  # channel= channels[i]
-  # channel= channel.replace('_','{\_}')
   # print "Working on the time snr plot now \n"
   # time_snr(bbh_trigs, vetoed_trigs, channel)
   # print "Working on the time frequency plot for the aux channel now \n"
