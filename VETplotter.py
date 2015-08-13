@@ -224,7 +224,7 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 def cumulative_histogram(omic_trigs,vetosegs,channel):
-  plot = omic_trigs.hist(snr, log=True, logbins=True, histtype='stepfilled',\
+  plot = omic_trigs.hist('snr', log=True, logbins=True, histtype='stepfilled',\
     color='g', cumulative=True, normed=True)
   plot.set_xlabel('Signal-to-noise ratio (SNR)')
   plot.set_ylabel('Normed Counts')
