@@ -282,7 +282,7 @@ for i in xrange(Nchannels):
 # We first sort our data by efficiency/deadtime, then efficiency
 # and finally deadtime
 statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
-fmt = {"channel":"%-40s","efficiency":"%10.4f", "deadtime":"%10.4f",\
+fmt = {"channel":"%-35s","efficiency":"%10.4f", "deadtime":"%10.4f",\
   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
   'loudest event by snr':"%10.4f", "95 percent":"%10.4f","96 percent":"%10.4f",\
   "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
