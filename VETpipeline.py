@@ -136,10 +136,7 @@ NumBBH = len(end_times)
 
 # Here is where I should define the threshold on the SNR
 # Get the peak times of the Omicron triggers
-peaktime_all_channels = map(lambda x: \
-    np.array(x.getColumnByName('peak_time')[:], dtype=float) + \
-    np.array(x.getColumnByName('peak_time_ns')[:], dtype=float) * 1.0e-9,\
-    omic_trigger_tables)
+
 #snr = np.array(map(lambda x: x.getColumnByName('snr')[:], omic_trigger_tables)
 
 # Calculate the offsets for a single channel. omic_times is the array of all the
@@ -151,6 +148,11 @@ window = 2.0
 import h5py
 f = h5py.File('vetosegments.hdf5', 'w')
 
+def filter_threshold(omic_trigs,snr_thresh):
+  selection = omic_trigs.copy()
+  selection.extend(filter(lambda x: x.snr > snr_thresh,omic_trigs))
+  return selection
+
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(omic_peaktimes, end_times, veto_segs):
   for endtime in end_times:
@@ -161,20 +163,25 @@ percentile = [95,96,97,98,99,99.5]
 
 for j in xrange(6):
   print "Get the offsets for the %d %% percentile.\n" %percentile[j]
-  thresh = f.create_group('%.1f' %percentile[j])
+  thresh_grp = f.create_group('%.1f' %percentile[j])
+  
   for i in xrange(len(channels)):
     print "Working on channel %d now...\n" %i
     # Get the SNR threshold to use for this channel.
     snr_thresh = thresholds[channels[i]][j]
-    omic_peaktimes = peaktime_all_channels[i] # one channel at a time!
-    selection = omic_peaktimes.copy()
-    selection.extend(filter(lambda x: x.snr > snr_thresh,omic_peaktimes))
+    omic_trigs = omic_trigger_tables[i] # get triggers from one channel at a time!
+    # Apply the snr filter to the triggers and get their peaktimes
+    selection = filter_threshold(omic_trigs, snr_thresh)
+    peaktime = np.array(selection.getColumnByName('peak_time')[:], dtype=float) + \
+      np.array(selection.getColumnByName('peak_time_ns')[:], dtype=float) * 1.0e-9)
+    # Now we can calculate the offsets for this channel
     veto_segs = []
     t0 = time.time()
-    get_vetotimes(selection, end_times, veto_segs)
+    get_vetotimes(peaktime, end_times, veto_segs)
     t1 = time.time()
     print "This took %f seconds to run to completion\n" %(t1 - t0)
 
+    # Coalesce the segments and write them out to the file
     print "Offsets calculated. Coalesce the segments now\n"
     veto_segs = SegmentList(veto_segs)
     # Merge contiguous veto sections and sort the list of segments
@@ -184,7 +191,7 @@ for j in xrange(6):
     # We will use h5py to write out all the segments in groups organized by the name
     # of the channel
     print "Write the segments to file\n"
-    grp = thresh.create_group('%s' %channels[i])
+    grp = thresh_grp.create_group('%s' %channels[i])
     SegmentList.write(veto_segs, grp, 'vetosegs')
     print "All done!"
 
