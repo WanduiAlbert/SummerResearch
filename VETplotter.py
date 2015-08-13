@@ -226,16 +226,12 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
 def cumulative_histogram(omic_trigs,vetosegs,channel):
   plot = omic_trigs.hist(snr, log=True, logbins=True, histtype='stepfilled',\
     color='g', cumulative=True, normed=True)
-  ax.set_xlabel('Signal-to-noise ratio (SNR)')
-  ax.set_ylabel('Counts (N)')
-  ax.set_yscale('log', nonposy='clip')
-  ax.set_xscale('log', nonposx='clip')
-  ax.set_title(r'%s Cumulative histogram for channel %s' %(ifo, channel))
-  plt.legend()
-  plt.xlim(5.5, np.max(snr))
-  plt.grid(True, which="both")
-  plt.savefig(r'%s_histogram.png' %channel)
-  plt.close()
+  plot.set_xlabel('Signal-to-noise ratio (SNR)')
+  plot.set_ylabel('Normed Counts')
+  plot.set_yscale('log', nonposy='clip')
+  plot.set_xscale('log', nonposx='clip')
+  plot.set_title(r'%s Cumulative histogram for channel %s' %(ifo, channel))
+  plot.savefig(r'%s_histogram.png' %channel)
 
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
@@ -249,6 +245,7 @@ for i in xrange(Nchannels):
   vetoed_trigs= bbh_trigs.vetoed(vetosegs)
   vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
   summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+  cumulative_histogram(omic_trigs,vetosegs,channels[i])
   # Now do the plotting
   # histogram(bbh_trigs, vetosegs, channels[i])
   # channel= channels[i]
