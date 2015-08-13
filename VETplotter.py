@@ -111,7 +111,7 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   usep = get_metric('use percentage')
   loudbysnr = get_metric('loudest event by snr')
   mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
-      ('efficiency_over_deadtime',float), ('use_percentage',float),\
+      ('efficiency/deadtime',float), ('use_percentage',float),\
       ('loudest_event', float)]
   myflag = DataQualityFlag()
   myflag.active = vetosegs
@@ -218,26 +218,29 @@ for i in xrange(Nchannels):
   # after_snr = np.array(after_trigs.getColumnByName('snr')[:])
   vetoed_trigs= bbh_trigs.vetoed(vetosegs)
   vetoed_omic_trigs= omic_trigs.vetoed(vetosegs)
-  #summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+  summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
   # Now do the plotting
   # histogram(snr, after_snr, channels[i])
-  channel= channels[i]
-  channel= channel.replace('_','{\_}')
-  print "Working on the time snr plot now \n"
-  time_snr(bbh_trigs, vetoed_trigs, channel)
-  print "Working on the time frequency plot for the aux channel now \n"
-  aux_time_freq(omic_trigs, vetoed_omic_trigs, channel)
-  print "Working on the snr frequency plot for the aux channel now \n"
-  aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel)
-  print "Working on the snr time plot for the aux channel now \n"
-  aux_snr_time(omic_trigs,vetoed_omic_trigs, channel)
+  # channel= channels[i]
+  # channel= channel.replace('_','{\_}')
+  # print "Working on the time snr plot now \n"
+  # time_snr(bbh_trigs, vetoed_trigs, channel)
+  # print "Working on the time frequency plot for the aux channel now \n"
+  # aux_time_freq(omic_trigs, vetoed_omic_trigs, channel)
+  # print "Working on the snr frequency plot for the aux channel now \n"
+  # aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel)
+  # print "Working on the snr time plot for the aux channel now \n"
+  # aux_snr_time(omic_trigs,vetoed_omic_trigs, channel)
   # downtime(vetosegs, segments, channel)
   print "Done! Moving on to the next channel!!!!\n"
 
 ## Write this data to a file
-#fmt = "%s %10.4f %10.4f %10.4f %10.4f %10.4f"
-#np.savetxt('vetostats.txt', statistics, fmt=fmt, delimiter=' ',\
-#    header='channel efficiency deadtime efficiency/deadtime use_percentage loudest_event')
+from astropy.io import ascii
+fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
+  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f"}
+names = ["channel", "efficiency", "deadtime", "efficiency/deadtime", "use percentage"]
+ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
+  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ", position_char="=")
 
 print "All done!!!!"
 f.close()
