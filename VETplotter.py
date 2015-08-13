@@ -264,7 +264,7 @@ for i in xrange(Nchannels):
 ## Write this data to a file
 # We first sort our data by efficiency/deadtime, then efficiency
 # and finally deadtime
-statistics.sort(order=["efficiency/deadtime", "deadtime", "efficiency"])
+statistics.sort(order="efficiency/deadtime")
 fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",'loudest event by snr':"%10.4f"}
 names = ["channel", "efficiency", "deadtime",\
