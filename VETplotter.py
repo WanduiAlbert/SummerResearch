@@ -116,7 +116,6 @@ def my_use_percentage(segments,before,after=None):
   the channel. The standard definition checks segments instead.
   """
   return len(before.vetoed(segments.active))/len(before)
-
 register_metric(Metric(my_use_percentage, "my use percentage", unit=Unit('%')))
 
 # Defining the functions for all 9 plots and the summary statistics
@@ -225,6 +224,20 @@ def aux_snr_time(omic_trigs,vetoed_omic_trigs, channel):
   plot.savefig(r'%s_aux_time_snr.png' %save,\
     bbox_extra_artists=(lgd,), bbox_inches='tight')
 
+def cumulative_histogram(omic_trigs,vetosegs,channel):
+  plot = omic_trigs.hist(snr, log=True, logbins=True, histtype='stepfilled',\
+    color='g', cumulative=True, normed=True)
+  ax.set_xlabel('Signal-to-noise ratio (SNR)')
+  ax.set_ylabel('Counts (N)')
+  ax.set_yscale('log', nonposy='clip')
+  ax.set_xscale('log', nonposx='clip')
+  ax.set_title(r'%s Cumulative histogram for channel %s' %(ifo, channel))
+  plt.legend()
+  plt.xlim(5.5, np.max(snr))
+  plt.grid(True, which="both")
+  plt.savefig(r'%s_histogram.png' %channel)
+  plt.close()
+
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
       ('loudest_event', float)]
@@ -257,8 +270,9 @@ for i in xrange(Nchannels):
 # and finally deadtime
 statistics.sort(order=["efficiency/deadtime", "deadtime", "efficiency"])
 fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
-  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f"}
-names = ["channel", "efficiency", "deadtime", "efficiency/deadtime", "use percentage"]
+  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",'loudest event by snr':"%10.4f"}
+names = ["channel", "efficiency", "deadtime",\
+  "efficiency/deadtime", "use percentage","loudest event by snr"]
 ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
   comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
 
