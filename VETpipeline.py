@@ -157,28 +157,36 @@ def get_vetotimes(omic_peaktimes, end_times, veto_segs):
     if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
       veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
-for i in xrange(len(channels)):
-  omic_peaktimes = peaktime_all_channels[i] # one channel at a time!
+percentile = [95,96,97,98,99,99.5]
 
-  print "Working on channel %d now...\n" %i
-  veto_segs = []
-  t0 = time.time()
-  get_vetotimes(omic_peaktimes, end_times, veto_segs)
-  t1 = time.time()
-  print "This took %f seconds to run to completion\n" %(t1 - t0)
+for j in xrange(6):
+  print "Get the offsets for the %d % percentile.\n" %percentile[j]
+  thresh = f.create_group('%.1f' %percentile[j])
+  for i in xrange(len(channels)):
+    print "Working on channel %d now...\n" %i
+    # Get the SNR threshold to use for this channel.
+    snr_thresh = thresholds[channels[i]][j]
+    omic_peaktimes = peaktime_all_channels[i] # one channel at a time!
+    selection = omic_peaktimes.copy()
+    selection.extend(filter(lambda x: x.snr > snr_thresh,omic_peaktimes))
+    veto_segs = []
+    t0 = time.time()
+    get_vetotimes(selection, end_times, veto_segs)
+    t1 = time.time()
+    print "This took %f seconds to run to completion\n" %(t1 - t0)
 
-  print "Offsets calculated. Coalesce the segments now\n"
-  veto_segs = SegmentList(veto_segs)
-  # Merge contiguous veto sections and sort the list of segments
-  veto_segs.coalesce()
+    print "Offsets calculated. Coalesce the segments now\n"
+    veto_segs = SegmentList(veto_segs)
+    # Merge contiguous veto sections and sort the list of segments
+    veto_segs.coalesce()
 
-  # Write all the segments to disk. Read in the [0, 2] columns to recover the data
-  # We will use h5py to write out all the segments in groups organized by the name
-  # of the channel
-  print "Write the segments to file\n"
-  grp = f.create_group('%s' %channels[i])
-  SegmentList.write(veto_segs, grp, 'vetosegs')
-  print "All done!"
+    # Write all the segments to disk. Read in the [0, 2] columns to recover the data
+    # We will use h5py to write out all the segments in groups organized by the name
+    # of the channel
+    print "Write the segments to file\n"
+    grp = thresh.create_group('%s' %channels[i])
+    SegmentList.write(veto_segs, grp, 'vetosegs')
+    print "All done!"
 
 f.close()
 print "Finished computing the offsets for all the channels!!!! Wooohoo!!!\n"
