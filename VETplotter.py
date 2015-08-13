@@ -4,6 +4,8 @@ import sys
 
 import numpy as np
 
+from __future__ import division
+
 from gwpy.segments import Segment, SegmentList, DataQualityFlag
 from gwpy.table.lsctables import SnglBurstTable, SnglInspiralTable
 
@@ -20,6 +22,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from gwpy.plotter import EventTablePlot
+
+from gwpy.toolkits.vet import Metric, register_metric
+from astropy.units import Unit
+from astropy.io import ascii
 
 # Save all the channels in a python script
 channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
@@ -100,7 +106,18 @@ window = 2.0
 import h5py
 f = h5py.File('vetosegments.hdf5', 'r')
 
-snr = np.array(bbh_trigs.getColumnByName('snr')[:])
+
+
+# Redefine use percentage
+def my_use_percentage(segments,before,after=None):
+  """
+  Calculate the use percentage as the ratio of the triggers in
+  an auxiliary channel used to the total number of triggers in
+  the channel. The standard definition checks segments instead.
+  """
+  return len(before.vetoed(segments.active))/len(before)
+
+register_metric(Metric(my_use_percentage, "my use percentage", unit=Unit('%')))
 
 # Defining the functions for all 9 plots and the summary statistics
 def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segments):
@@ -108,7 +125,7 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   eff = get_metric('efficiency')
   dt = get_metric('deadtime')
   eff_over_dt = get_metric('efficiency/deadtime')
-  usep = get_metric('use percentage')
+  usep = get_metric('my use percentage')
   loudbysnr = get_metric('loudest event by snr')
   myflag = DataQualityFlag()
   myflag.active = vetosegs
@@ -125,7 +142,10 @@ def downtime(vetosegs, segments, channel):
   plot.set_title(r'Active and vetoed segments for %s' %channel)
   plot.savefig(r'%s_downtime.png'%channel)
 
-def histogram(snr, after_snr, channel):
+def histogram(bbh_trigs, vetosegs, channel):
+  snr = np.array(bbh_trigs.getColumnByName('snr')[:])
+  after_trigs = bbh_trigs.veto(vetosegs) # Triggers that remained
+  after_snr = np.array(after_trigs.getColumnByName('snr')[:])
   plt.figure(figsize=(12,10))
   bins = np.logspace(np.log10(5.5), np.log10(np.max(snr)), 50)
   labels = [r'Before \nNTrigs=%d'%len(snr), r'After \nNTrigs=%d'%len(after_snr)]
@@ -214,13 +234,11 @@ for i in xrange(Nchannels):
   key = channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
-  after_trigs = bbh_trigs.veto(vetosegs)
-  # after_snr = np.array(after_trigs.getColumnByName('snr')[:])
   vetoed_trigs= bbh_trigs.vetoed(vetosegs)
-  vetoed_omic_trigs= omic_trigs.vetoed(vetosegs)
+  vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
   summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
   # Now do the plotting
-  # histogram(snr, after_snr, channels[i])
+  # histogram(bbh_trigs, vetosegs, channels[i])
   # channel= channels[i]
   # channel= channel.replace('_','{\_}')
   # print "Working on the time snr plot now \n"
@@ -238,7 +256,6 @@ for i in xrange(Nchannels):
 # We first sort our data by efficiency/deadtime, then efficiency
 # and finally deadtime
 statistics.sort(order=["efficiency/deadtime", "deadtime", "efficiency"])
-from astropy.io import ascii
 fmt = {"channel":"%-50s","efficiency":"%10.4f", "deadtime":"%10.4f",\
   "efficiency/deadtime":"%10.4f","use percentage":"%10.4f"}
 names = ["channel", "efficiency", "deadtime", "efficiency/deadtime", "use percentage"]
