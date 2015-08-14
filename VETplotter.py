@@ -141,10 +141,10 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   myflag.known = segments
   statistics[i] = (channel, eff(myflag, bbh_trigs).value, dt(myflag).value,\
       eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
-      loudbysnr(myflag, bbh_trigs).value, get_percentile(omic_trigs, 95).value,\
-      get_percentile(omic_trigs, 96).value, get_percentile(omic_trigs, 97).value,\
-      get_percentile(omic_trigs, 98).value,get_percentile(omic_trigs, 99).value,\
-      get_percentile(omic_trigs, 99.5).value)
+      loudbysnr(myflag, bbh_trigs).value)#, get_percentile(omic_trigs, 95).value,\
+      # get_percentile(omic_trigs, 96).value, get_percentile(omic_trigs, 97).value,\
+      # get_percentile(omic_trigs, 98).value,get_percentile(omic_trigs, 99).value,\
+      # get_percentile(omic_trigs, 99.5).value)
 
 def downtime(vetosegs, segments, channel):
   myflag = DataQualityFlag()
@@ -248,51 +248,58 @@ def cumulative_histogram(omic_trigs,vetosegs,channel):
   save = channel.replace('{\_}', '_')
   plot.savefig(r'%s_cumulative_histogram.png' %save)
 
+# Define the variables needed to write the data to file
+# -------------------------------------------------------------------------- #
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
-      ('loudest_event', float),('95 percent', float),('96 percent', float),\
-      ('97 percent', float),('98 percent', float),('99 percent', float),\
-      ('99.5 percent', float)]
+      ('loudest_event', float)]#,('95 percent', float),('96 percent', float),\
+      # ('97 percent', float),('98 percent', float),('99 percent', float),\
+      # ('99.5 percent', float)]
 statistics = np.zeros((Nchannels), dtype=mydtypes)
-percentile = ['95.0', '96.0', '97.0', '98.0', '99.0', '99.5']
-# Make some basic histograms
-for i in xrange(Nchannels):
-  key = percentile[0] +'/'+ channels[i] +'/vetosegs'
-  omic_trigs= omic_trigger_tables[i]
-  vetosegs= SegmentList.read(f, key)
-  summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
-  # vetoed_trigs= bbh_trigs.vetoed(vetosegs)
-  # vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
-  # channel= channels[i]
-  # channel= channel.replace('_','{\_}')
-  # cumulative_histogram(omic_trigs,vetosegs,channel)
-  # Now do the plotting
-  # histogram(bbh_trigs, vetosegs, channels[i])
-  # print "Working on the time snr plot now \n"
-  # time_snr(bbh_trigs, vetoed_trigs, channel)
-  # print "Working on the time frequency plot for the aux channel now \n"
-  # aux_time_freq(omic_trigs, vetoed_omic_trigs, channel)
-  # print "Working on the snr frequency plot for the aux channel now \n"
-  # aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel)
-  # print "Working on the snr time plot for the aux channel now \n"
-  # aux_snr_time(omic_trigs,vetoed_omic_trigs, channel)
-  # downtime(vetosegs, segments, channel)
-  print "Done! Moving on to the next channel!!!!\n"
-
-## Write this data to a file
-# We first sort our data by efficiency/deadtime, then efficiency
-# and finally deadtime
-statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
 fmt = {"channel":"%-35s","efficiency":"%10.4f", "deadtime":"%10.4f",\
-  "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
-  'loudest event by snr':"%10.4f", "95 percent":"%10.4f","96 percent":"%10.4f",\
-  "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
-  "99.5 percent":"%10.4f"}
+    "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
+    'loudest event by snr':"%10.4f",}# "95 percent":"%10.4f","96 percent":"%10.4f",\
+    # "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
+    # "99.5 percent":"%10.4f"}
 names = ["channel", "efficiency", "deadtime",\
-  "efficiency/deadtime", "use percentage","loudest event by snr","95 percent",\
-  "96 percent","97 percent","98 percent","99 percent","99.5 percent"]
-ascii.write(statistics, output="vetostats.txt",format="fixed_width", names=names,\
-  comment="#", formats=fmt, delimiter="|", delimiter_pad=" ")
+    "efficiency/deadtime", "use percentage","loudest event by snr"]#,\
+    # "95 percent", "96 percent","97 percent","98 percent","99 percent","99.5 percent"]
+percentile = ['95.0', '96.0', '97.0', '98.0', '99.0', '99.5']
+
+# -------------------------------------------------------------------------- #
+# Make some basic histograms
+for j in xrange(len(percentile)):
+  print "Working on the {0} percentile now. \n".format(percentile[0])
+  for i in xrange(Nchannels):
+    key = percentile[j] +'/'+ channels[i] +'/vetosegs'
+    omic_trigs= omic_trigger_tables[i]
+    vetosegs= SegmentList.read(f, key)
+    summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
+    # vetoed_trigs= bbh_trigs.vetoed(vetosegs)
+    # vetoed_omic_trigs= omic_trigs.vetoed(vetosegs) #Triggers that were vetoed
+    # channel= channels[i]
+    # channel= channel.replace('_','{\_}')
+    # cumulative_histogram(omic_trigs,vetosegs,channel)
+    # Now do the plotting
+    # histogram(bbh_trigs, vetosegs, channels[i])
+    # print "Working on the time snr plot now \n"
+    # time_snr(bbh_trigs, vetoed_trigs, channel)
+    # print "Working on the time frequency plot for the aux channel now \n"
+    # aux_time_freq(omic_trigs, vetoed_omic_trigs, channel)
+    # print "Working on the snr frequency plot for the aux channel now \n"
+    # aux_snr_freq(omic_trigs, vetoed_omic_trigs, channel)
+    # print "Working on the snr time plot for the aux channel now \n"
+    # aux_snr_time(omic_trigs,vetoed_omic_trigs, channel)
+    # downtime(vetosegs, segments, channel)
+    print "Done! Moving on to the next channel!!!!\n"
+
+  ## Write this data to a file
+  # We first sort our data by efficiency/deadtime, then efficiency
+  # and finally deadtime
+  statistics[::-1].sort(order=["efficiency/deadtime","deadtime","efficiency"])
+  ascii.write(statistics, output="vetostats_{0}.txt".format(percentile[j]),\
+    format="fixed_width", names=names, comment="#",\
+    formats=fmt, delimiter="|", delimiter_pad=" ")
 
 print "All done!!!!"
 f.close()
