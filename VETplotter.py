@@ -254,9 +254,10 @@ mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('97 percent', float),('98 percent', float),('99 percent', float),\
       ('99.5 percent', float)]
 statistics = np.zeros((Nchannels), dtype=mydtypes)
+percentile = '95/'
 # Make some basic histograms
 for i in xrange(Nchannels):
-  key = channels[i] +'/vetosegs'
+  key = percentile + channels[i] +'/vetosegs'
   omic_trigs= omic_trigger_tables[i]
   vetosegs= SegmentList.read(f, key)
   summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
