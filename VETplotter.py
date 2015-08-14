@@ -258,7 +258,7 @@ mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
 statistics = np.zeros((Nchannels), dtype=mydtypes)
 fmt = {"channel":"%-35s","efficiency":"%10.4f", "deadtime":"%10.4f",\
     "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
-    'loudest event by snr':"%10.4f",}# "95 percent":"%10.4f","96 percent":"%10.4f",\
+    'loudest event by snr':"%10.4f"}#, "95 percent":"%10.4f","96 percent":"%10.4f",\
     # "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
     # "99.5 percent":"%10.4f"}
 names = ["channel", "efficiency", "deadtime",\
