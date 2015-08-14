@@ -164,7 +164,7 @@ percentile = [95,96,97,98,99,99.5]
 for j in xrange(6):
   print "Get the offsets for the %d %% percentile.\n" %percentile[j]
   thresh_grp = f.create_group('%.1f' %percentile[j])
-  
+
   for i in xrange(len(channels)):
     print "Working on channel %d now...\n" %i
     # Get the SNR threshold to use for this channel.
