@@ -16,43 +16,31 @@ from gwpy.toolkits.vet import (get_triggers,get_segments,get_metric)
 import glob, os
 
 # Save all the channels in a python script
-channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
-"PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
-"LSC-POP_A_LF_OUT_DQ",
-"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
-"OMC-ASC_POS_Y_OUT_DQ",
-"PEM-EX_TILT_VEA_FLOOR_T_DQ",
-"PEM-EY_TILT_VEA_FLOOR_T_DQ",
-"OMC-PZT2_MON_AC_OUT_DQ",
-"LSC-SRCL_OUT_DQ",
-"IMC-REFL_DC_OUT_DQ",
-"ALS-X_REFL_ERR_OUT_DQ",
-"PEM-CS_MAG_EBAY_SUSRACK_Y_DQ",
-"ASC-Y_TR_B_NSUM_OUT_DQ",
+channels = ["ALS-X_REFL_ERR_OUT_DQ",
+"ASC-AS_B_RF36_I_YAW_OUT_DQ",
 "ASC-AS_B_RF45_Q_PIT_OUT_DQ",
-"SUS-OMC_M1_ISIWIT_T_DQ",
-"PSL-ISS_AOM_DRIVER_MON_OUT_DQ",
-"LSC-PRCL_OUT_DQ"]
+"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
+"ASC-Y_TR_B_NSUM_OUT_DQ",
+"IMC-REFL_DC_OUT_DQ",
+"PSL-ISS_AOM_DRIVER_MON_OUT_DQ"]
 
-# For each channel this defines the SNR thresholds to check
-# for the 95,96,97,98,99,99.5% levels
-thresholds = {"ASC-AS_B_RF36_I_YAW_OUT_DQ":[22.8,24.6,27.2,33.3,46.3,95.2],
-"PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ":[18.4, 18.9, 19.5, 31.6, 116.9, 128.8],
-"LSC-POP_A_LF_OUT_DQ":[43.6, 46.2, 49.9, 55.1,63.3,71.0],
-"ASC-AS_B_RF45_Q_YAW_OUT_DQ":[468.6, 680.4, 1008.6, 1314.7, 7150.5, 8713.4],
-"OMC-ASC_POS_Y_OUT_DQ":[16.8,17.6,18.6,19.9,22.0,23.8],
-"PEM-EX_TILT_VEA_FLOOR_T_DQ":[19.6,20.3,21.0,22.4,25.5,29.4],
-"PEM-EY_TILT_VEA_FLOOR_T_DQ":[19.6,20.1,20.9,22.0,24.5,27.9],
-"OMC-PZT2_MON_AC_OUT_DQ":[729.2,10178,10767,10938,11105,11855],
-"LSC-SRCL_OUT_DQ":[19.4, 20.4,21.8,24.4,31.1,44.3],
-"IMC-REFL_DC_OUT_DQ":[46.5,50.8,57.0,67.6,95.8,130.7],
-"ALS-X_REFL_ERR_OUT_DQ":[10.0,10.1,10.3,10.6,11.1,11.6],
-"PEM-CS_MAG_EBAY_SUSRACK_Y_DQ":[25.8,26.0,26.3,26.6,27.6,35.3],
-"ASC-Y_TR_B_NSUM_OUT_DQ":[20.8,21.2,21.5,21.8,25.3,51.2],
-"ASC-AS_B_RF45_Q_PIT_OUT_DQ":[88.0, 315.8,570.5,1009.0,1951.8,8021.4],
-"SUS-OMC_M1_ISIWIT_T_DQ":[18.4,19.6,23.7,27.7,40.3,426.9],
-"PSL-ISS_AOM_DRIVER_MON_OUT_DQ":[16.6,24.1,28.2,20.8,34.2,38.3],
-"LSC-PRCL_OUT_DQ":[21.3,22.6,24.3,26.8,30.2,35.6]}
+#channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
+#"PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
+#"LSC-POP_A_LF_OUT_DQ",
+#"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
+#"OMC-ASC_POS_Y_OUT_DQ",
+#"PEM-EX_TILT_VEA_FLOOR_T_DQ",
+#"PEM-EY_TILT_VEA_FLOOR_T_DQ",
+#"OMC-PZT2_MON_AC_OUT_DQ",
+#"LSC-SRCL_OUT_DQ",
+#"IMC-REFL_DC_OUT_DQ",
+#"ALS-X_REFL_ERR_OUT_DQ",
+#"PEM-CS_MAG_EBAY_SUSRACK_Y_DQ",
+#"ASC-Y_TR_B_NSUM_OUT_DQ",
+#"ASC-AS_B_RF45_Q_PIT_OUT_DQ",
+#"SUS-OMC_M1_ISIWIT_T_DQ",
+#"PSL-ISS_AOM_DRIVER_MON_OUT_DQ",
+#"LSC-PRCL_OUT_DQ"]
 
 ifo = sys.argv[1]
 bbhdir = sys.argv[2]
@@ -153,23 +141,34 @@ def filter_threshold(omic_trigs,snr_thresh):
   selection.extend(filter(lambda x: x.snr > snr_thresh,omic_trigs))
   return selection
 
+def get_percentile(before, level):
+  """
+  Get a percentile level for the snr of the triggers from a channel.
+  This is useful in evaluating appropriate levels at which to set the
+  snr threshold.
+  """
+  snr = np.array(before.getColumnByName('snr')[:])
+  return np.percentile(snr, level)
+
 # Function that gets the veto time for a single bbhtime
 def get_vetotimes(omic_peaktimes, end_times, veto_segs):
   for endtime in end_times:
     if np.any(np.abs(endtime - omic_peaktimes) <= window/2.0):
       veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
-percentile = [95,96,97,98,99,99.5]
+# Percentiles at which to check our data
+percentile = np.arange(20,100,2)
 
-for j in xrange(6):
+# Loop over the percentiles and extract the relevant statistics
+for j in xrange(len(percentile)):
   print "Get the offsets for the %d %% percentile.\n" %percentile[j]
   thresh_grp = f.create_group('%.1f' %percentile[j])
-  
+
   for i in xrange(len(channels)):
     print "Working on channel %d now...\n" %i
     # Get the SNR threshold to use for this channel.
-    snr_thresh = thresholds[channels[i]][j]
     omic_trigs = omic_trigger_tables[i] # get triggers from one channel at a time!
+    snr_thresh = get_percentile(omic_trigs, percentile[j])
     # Apply the snr filter to the triggers and get their peaktimes
     selection = filter_threshold(omic_trigs, snr_thresh)
     peaktime = np.array(selection.getColumnByName('peak_time')[:], dtype=float) + \

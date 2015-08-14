@@ -26,24 +26,32 @@ from gwpy.toolkits.vet import Metric, register_metric
 from astropy.units import Unit
 from astropy.io import ascii
 
-# Save all the channels in a python script
-channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
-"PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
-"LSC-POP_A_LF_OUT_DQ",
-"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
-"OMC-ASC_POS_Y_OUT_DQ",
-"PEM-EX_TILT_VEA_FLOOR_T_DQ",
-"PEM-EY_TILT_VEA_FLOOR_T_DQ",
-"OMC-PZT2_MON_AC_OUT_DQ",
-"LSC-SRCL_OUT_DQ",
-"IMC-REFL_DC_OUT_DQ",
-"ALS-X_REFL_ERR_OUT_DQ",
-"PEM-CS_MAG_EBAY_SUSRACK_Y_DQ",
-"ASC-Y_TR_B_NSUM_OUT_DQ",
+channels = ["ALS-X_REFL_ERR_OUT_DQ",
+"ASC-AS_B_RF36_I_YAW_OUT_DQ",
 "ASC-AS_B_RF45_Q_PIT_OUT_DQ",
-"SUS-OMC_M1_ISIWIT_T_DQ",
-"PSL-ISS_AOM_DRIVER_MON_OUT_DQ",
-"LSC-PRCL_OUT_DQ"]
+"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
+"ASC-Y_TR_B_NSUM_OUT_DQ",
+"IMC-REFL_DC_OUT_DQ",
+"PSL-ISS_AOM_DRIVER_MON_OUT_DQ"]
+
+# Save all the channels in a python script
+#channels = ["ASC-AS_B_RF36_I_YAW_OUT_DQ",
+#"PEM-EY_MAG_EBAY_SUSRACK_QUAD_SUM_DQ",
+#"LSC-POP_A_LF_OUT_DQ",
+#"ASC-AS_B_RF45_Q_YAW_OUT_DQ",
+#"OMC-ASC_POS_Y_OUT_DQ",
+#"PEM-EX_TILT_VEA_FLOOR_T_DQ",
+#"PEM-EY_TILT_VEA_FLOOR_T_DQ",
+#"OMC-PZT2_MON_AC_OUT_DQ",
+#"LSC-SRCL_OUT_DQ",
+#"IMC-REFL_DC_OUT_DQ",
+#"ALS-X_REFL_ERR_OUT_DQ",
+#"PEM-CS_MAG_EBAY_SUSRACK_Y_DQ",
+#"ASC-Y_TR_B_NSUM_OUT_DQ",
+#"ASC-AS_B_RF45_Q_PIT_OUT_DQ",
+#"SUS-OMC_M1_ISIWIT_T_DQ",
+#"PSL-ISS_AOM_DRIVER_MON_OUT_DQ",
+#"LSC-PRCL_OUT_DQ"]
 
 ifo = sys.argv[1]
 bbhdir = sys.argv[2]
@@ -141,10 +149,7 @@ def summary_stats(statistics, bbh_trigs, omicron_trigs, channel, vetosegs, segme
   myflag.known = segments
   statistics[i] = (channel, eff(myflag, bbh_trigs).value, dt(myflag).value,\
       eff_over_dt(myflag, bbh_trigs).value, usep(myflag, omic_trigs).value,\
-      loudbysnr(myflag, bbh_trigs).value)#, get_percentile(omic_trigs, 95).value,\
-      # get_percentile(omic_trigs, 96).value, get_percentile(omic_trigs, 97).value,\
-      # get_percentile(omic_trigs, 98).value,get_percentile(omic_trigs, 99).value,\
-      # get_percentile(omic_trigs, 99.5).value)
+      loudbysnr(myflag, bbh_trigs).value)
 
 def downtime(vetosegs, segments, channel):
   myflag = DataQualityFlag()
@@ -252,26 +257,26 @@ def cumulative_histogram(omic_trigs,vetosegs,channel):
 # -------------------------------------------------------------------------- #
 mydtypes = [('channel', 'a50'), ('efficiency', float), ('deadtime', float),\
       ('efficiency/deadtime',float), ('use_percentage',float),\
-      ('loudest_event', float)]#,('95 percent', float),('96 percent', float),\
-      # ('97 percent', float),('98 percent', float),('99 percent', float),\
-      # ('99.5 percent', float)]
+      ('loudest_event', float)]
+
 statistics = np.zeros((Nchannels), dtype=mydtypes)
 fmt = {"channel":"%-35s","efficiency":"%10.4f", "deadtime":"%10.4f",\
     "efficiency/deadtime":"%10.4f","use percentage":"%10.4f",\
-    'loudest event by snr':"%10.4f",}# "95 percent":"%10.4f","96 percent":"%10.4f",\
-    # "97 percent":"%10.4f","98 percent":"%10.4f","99 percent":"%10.4f",\
-    # "99.5 percent":"%10.4f"}
+    'loudest event by snr':"%10.4f"}
+
 names = ["channel", "efficiency", "deadtime",\
-    "efficiency/deadtime", "use percentage","loudest event by snr"]#,\
-    # "95 percent", "96 percent","97 percent","98 percent","99 percent","99.5 percent"]
-percentile = ['95.0', '96.0', '97.0', '98.0', '99.0', '99.5']
+    "efficiency/deadtime", "use percentage","loudest event by snr"]
+
+#percentile = ['95.0', '96.0', '97.0', '98.0', '99.0', '99.5']
+percentile = np.arange(20,100,2, dtype=float)
 
 # -------------------------------------------------------------------------- #
 # Make some basic histograms
 for j in xrange(len(percentile)):
-  print "Working on the {0} percentile now. \n".format(percentile[0])
+  print "Working on the {0} percentile now. \n".format(percentile[j])
   for i in xrange(Nchannels):
-    key = percentile[j] +'/'+ channels[i] +'/vetosegs'
+    per = "%.1f" %percentile[j]
+    key = per +'/'+ channels[i] +'/vetosegs'
     omic_trigs= omic_trigger_tables[i]
     vetosegs= SegmentList.read(f, key)
     summary_stats(statistics, bbh_trigs, omic_trigs, channels[i], vetosegs, segments)
