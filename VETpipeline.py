@@ -157,7 +157,7 @@ def get_vetotimes(omic_peaktimes, end_times, veto_segs):
       veto_segs.append((float(endtime - window/2.0), float(endtime + window/2.0)))
 
 # Percentiles at which to check our data
-percentile = np.arange(20,100,2)
+percentile = np.arange(0,100,2)
 
 # Loop over the percentiles and extract the relevant statistics
 for j in xrange(len(percentile)):

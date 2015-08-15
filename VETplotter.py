@@ -268,7 +268,7 @@ names = ["channel", "efficiency", "deadtime",\
     "efficiency/deadtime", "use percentage","loudest event by snr"]
 
 #percentile = ['95.0', '96.0', '97.0', '98.0', '99.0', '99.5']
-percentile = np.arange(20,100,2, dtype=float)
+percentile = np.arange(0,100,2, dtype=float)
 
 # -------------------------------------------------------------------------- #
 # Make some basic histograms
