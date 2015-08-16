@@ -61,7 +61,7 @@ statsfiles = sorted(glob.glob(stats_dir + 'vetostats_[0-9]*.[0-9].txt'))
 
 print len(statsfiles)
 # this are the snr thresholds that were used in these calculations
-snr_thresholds= np.arange(0,100,2)
+snr_thresholds= np.arange(0,100,5)
 
 # Now lets read out the data. We are interested in reading out the efficiency,
 # deadtime and efficiency/deadtime columns
@@ -90,7 +90,7 @@ for channel in data:
   plt.figure(figsize=(12,10))
   plt.plot(data[channel][1], data[channel][0], linestyle='-',\
       marker='o', color='b')
-  plt.plot(data[channel][0], data[channel][0], 'r--',linewidth=2)
+  plt.plot(data[channel][0], data[channel][0], 'r-',linewidth=2)
   for label, x,y in zip(labels[::4], data[channel][1][::4], data[channel][0][::4]):
     plt.annotate(label,
         xy = (x,y),
@@ -112,7 +112,7 @@ for channel in data:
 print "All done!\nMake efficiency/deadtime curves now"
 for channel in data:
   plt.figure(figsize=(12,10))
-  plt.plot(snr_thresholds, data[channel][1], linestyle='-',\
+  plt.plot(snr_thresholds, data[channel][2], linestyle='-',\
       marker='o', color='b')
   titlestr= channel.replace('_','{\_}')
   plt.title(r'%s' % titlestr)
